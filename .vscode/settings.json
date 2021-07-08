@@ -2,5 +2,6 @@
     "python.pythonPath": "D:\\app\\python.exe",
     "python.linting.flake8Enabled": true,
     "editor.formatOnSave": true,
-    "python.linting.pylintEnabled": false
+    "python.linting.pylintEnabled": false,
+    "backgroundCover.opacity": 0.5
 }

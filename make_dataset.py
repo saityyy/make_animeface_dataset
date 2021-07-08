@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 
 class MakeDataset:
-    def __init__(self, root, images_path, moveto_path, fetch_num, img_size):
+    def __init__(self, root, images_path, moveto_path, fetch_num, img_size, output_size):
         self.centerx = 0
         self.centery = 0
         self.size = 0
