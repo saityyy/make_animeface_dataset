@@ -6,8 +6,6 @@ from PIL import Image, ImageTk
 
 IMAGEPATH = "../data/image".replace("/", os.sep)
 CSVPATH = "../data/target.csv".replace("/", os.sep)
-INPUTSIZE = 800
-OUTPUTSIZE = 200
 
 parser = argparse.ArgumentParser()
 parser.add_argument('fetch_num', type=int,
@@ -25,7 +23,7 @@ scale = 4
 
 
 def click(event):
-    global centerx, centery, count, size, img
+    global centerx, centery, count, size, _img
     if not centerx == 0:
         index = start_number+count
         with open(CSVPATH, 'a', newline="") as f:
@@ -40,21 +38,23 @@ def click(event):
             IMAGEPATH, "img{}.png".format(index+1))
         print(index)
         img = Image.open(image)
-        img = ImageTk.PhotoImage(img.resize(
+        _img = ImageTk.PhotoImage(img.resize(
             (img.width//scale, img.height//scale)))
-        canvas.create_image(0, 0, image=img, anchor=tk.NW)
+        canvas.create_image(0, 0, image=_img, anchor=tk.NW)
     else:
         centerx, centery = event.x, event.y
 
 
 def motion(event):
-    global centerx, centery, size, id
+    global centerx, centery, size, id, img
     if not centerx == 0:
         x, y = centerx, centery
         prev_size = size
         size = abs(centerx-event.x)
-        window_check = size < x < INPUTSIZE-size
-        window_check &= size < y < INPUTSIZE-size
+        w = img.width//scale
+        h = img.height//scale
+        window_check = size < x < w-size
+        window_check &= size < y < h-size
         if window_check:
             pass
         else:
@@ -67,13 +67,12 @@ def motion(event):
 
 img_path = os.path.join(IMAGEPATH, "img{}.png".format(start_number))
 img = Image.open(img_path)
-img = ImageTk.PhotoImage(img.resize((img.width//scale, img.height//scale)))
+_img = ImageTk.PhotoImage(img.resize((img.width//scale, img.height//scale)))
 canvas = tk.Canvas(
-    bg="black", width=INPUTSIZE, height=INPUTSIZE)
+    bg="black", width=4000, height=4000)
 canvas.place(x=0, y=0)
-canvas.create_image(0, 0, image=img, anchor=tk.NW)
+canvas.create_image(0, 0, image=_img, anchor=tk.NW)
 root.geometry("{}x{}".format(800, 800))
 canvas.bind('<Button-1>', click)  # 左クリック
-# canvas.bind('<Button-3>', delete_img)  # 右クリック
 canvas.bind('<Motion>', motion)  # カーソル移動時
 root.mainloop()
