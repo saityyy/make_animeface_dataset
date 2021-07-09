@@ -1,3 +1,8 @@
+# python check_face.py
+# 指定のフォルダからtempフォルダに画像をコピーする
+# データセットとして使えないものを省くために使用する。
+# マウス右クリックでtempフォルダに追加、マウス左クリックでスルー。以降、次の画像を表示
+
 import os
 import shutil
 import random
@@ -5,6 +10,7 @@ import string
 import tkinter as tk
 from PIL import Image, ImageTk
 
+# 指定のフォルダから画像をランダムに参照する
 FROMPATH = ("D:/Project/MLProject/DataScience/data/GirlsImage"
             .replace("/", os.sep))
 TOPATH = "../data/temp".replace("/", os.sep)

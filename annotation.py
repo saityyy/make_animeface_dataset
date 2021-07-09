@@ -1,3 +1,8 @@
+# python annotation.py
+# 一回目のクリックで矩形出現
+# 二回目にクリックで矩形の座標やサイズが確定。csvに記録
+# fetch_numの数だけimageフォルダから読み込む
+
 import argparse
 import os
 import csv
@@ -6,6 +11,7 @@ from PIL import Image, ImageTk
 
 IMAGEPATH = "../data/image".replace("/", os.sep)
 CSVPATH = "../data/target.csv".replace("/", os.sep)
+scale = 4  # tkinterで表示する画像の縮小倍率
 
 parser = argparse.ArgumentParser()
 parser.add_argument('fetch_num', type=int,
@@ -19,7 +25,6 @@ start_number = sum(1 for _ in open(CSVPATH))+1
 centerx, centery = 0, 0
 count = 0
 size = 0
-scale = 4
 
 
 def click(event):
