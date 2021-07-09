@@ -7,8 +7,8 @@
 `mkdir annotation`  
 `cd annotation`  
 `git clone https://github.com/saityyy/make_animeface_dataset.git`  
-2. 指定のディレクトリ構成になるようにフォルダやファイルを作成する。  
-3. 取ってきたい画像が入ったフォルダのパスを設定する(temp,image,target.csv)。  
+2. 指定のディレクトリ構成になるようにフォルダやファイルを作成する。(temp,image,target.csv)  
+3. 取ってきたい画像が入ったフォルダのパスを設定する(check_face.pyのFROMPATH変数)。  
   
   
 # 各スクリプトの説明  
