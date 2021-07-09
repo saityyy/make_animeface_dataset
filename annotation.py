@@ -14,10 +14,6 @@ CSVPATH = "../data/target.csv".replace("/", os.sep)
 scale = 4  # tkinterで表示する画像の縮小倍率
 
 parser = argparse.ArgumentParser()
-parser.add_argument('fetch_num', type=int,
-                    help='the number of images you want to fetch')
-args = parser.parse_args()
-fetch_num = max(args.fetch_num, 1)
 root = tk.Tk()
 
 id = None
@@ -28,7 +24,7 @@ size = 0
 
 
 def click(event):
-    global centerx, centery, count, size, _img
+    global centerx, centery, count, size, _img, img
     if not centerx == 0:
         index = start_number+count
         with open(CSVPATH, 'a', newline="") as f:
@@ -37,14 +33,12 @@ def click(event):
             print(count, scale*centerx, scale*centery, scale*size)
         centerx, centery = 0, 0
         count += 1
-        if count == fetch_num:
-            exit()
         image = os.path.join(
             IMAGEPATH, "img{}.png".format(index+1))
         print(index)
         img = Image.open(image)
-        _img = ImageTk.PhotoImage(img.resize(
-            (img.width//scale, img.height//scale)))
+        img = img.resize((img.width//scale, img.height//scale))
+        _img = ImageTk.PhotoImage(img)
         canvas.create_image(0, 0, image=_img, anchor=tk.NW)
     else:
         centerx, centery = event.x, event.y
@@ -56,8 +50,8 @@ def motion(event):
         x, y = centerx, centery
         prev_size = size
         size = abs(centerx-event.x)
-        w = img.width//scale
-        h = img.height//scale
+        w = img.width
+        h = img.height
         window_check = size < x < w-size
         window_check &= size < y < h-size
         if window_check:
@@ -72,7 +66,8 @@ def motion(event):
 
 img_path = os.path.join(IMAGEPATH, "img{}.png".format(start_number))
 img = Image.open(img_path)
-_img = ImageTk.PhotoImage(img.resize((img.width//scale, img.height//scale)))
+img = img.resize((img.width//scale, img.height//scale))
+_img = ImageTk.PhotoImage(img)
 canvas = tk.Canvas(
     bg="black", width=4000, height=4000)
 canvas.place(x=0, y=0)
