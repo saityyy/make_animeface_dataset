@@ -1,15 +1,25 @@
+# python check.py
+# csvに記録した矩形データが合っているか確認する。
+# 画像縮小はしないため、解像度の大きい画像は全体が表示されない。
+# クリックで次の画像（番号の一つ大きいファイル）を確認する。
+# 引数で番号を指定することによって、その番号から確認することができる。
 import os
 import csv
+import argparse
 import tkinter as tk
 from PIL import Image, ImageTk
 
 IMAGEPATH = "../data/image".replace("/", os.sep)
 CSVPATH = "../data/target.csv".replace("/", os.sep)
-INPUTSIZE = 800
 
+parser = argparse.ArgumentParser()
+parser.add_argument('start_number', type=int,
+                    default="1")
+
+args = parser.parse_args()
+start_number = args.start_number
 root = tk.Tk()
 
-start_number = 1
 count = 0
 id = None
 
