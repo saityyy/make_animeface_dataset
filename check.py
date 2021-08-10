@@ -8,8 +8,8 @@ import argparse
 import tkinter as tk
 from PIL import Image, ImageTk
 
-IMAGEPATH = "../data/image".replace("/", os.sep)
-CSVPATH = "../data/target.csv".replace("/", os.sep)
+IMAGEPATH = "../data/image"
+CSVPATH = "../data/target.csv"
 
 parser = argparse.ArgumentParser()
 parser.add_argument('start_number', type=int,
@@ -21,46 +21,46 @@ root = tk.Tk()
 
 scale = 3  # tkinterで表示する画像の縮小倍率
 count = 0
-id = None
+show_id = None
 
 
 def click(event):
-    global count, img, f
+    global count, img
     count += 1
-    next_img = start_number+count
-    if next_img-1 >= len(f):
+    next_img_index = start_number+count
+    if next_img_index-1 >= len(csv_list):
         print("exit")
         exit()
     image = os.path.join(
-        IMAGEPATH, "img{}.png".format(next_img))
+        IMAGEPATH, "img{}.png".format(next_img_index))
     img = Image.open(image)
     img = ImageTk.PhotoImage(img.resize((img.width//scale, img.height//scale)))
     canvas.create_image(0, 0, image=img, anchor=tk.NW)
-    draw_rectangle(f[next_img-1])
+    draw_rectangle(csv_list[next_img_index-1])
 
 
 def draw_rectangle(data):
-    global id
+    global show_id
     centerx = int(data[1])//scale
     centery = int(data[2])//scale
     size = int(data[3])//scale
     print(data)
-    if id is not None:
-        canvas.delete(id)
-    id = canvas.create_rectangle(
+    if show_id is not None:
+        canvas.delete(show_id)
+    show_id = canvas.create_rectangle(
         centerx-size, centery-size, centerx+size, centery+size)
 
 
 csv_file = open(CSVPATH, "r", newline="")
-f = list(csv.reader(csv_file, delimiter=","))
-img_path = os.path.join(IMAGEPATH, "img{}.png".format(start_number))
+csv_list = list(csv.reader(csv_file, delimiter=","))
+start_number = min(start_number, len(csv_list))
+img_path = os.path.join(IMAGEPATH, f"img{start_number}.png")
 img = Image.open(img_path)
 img = ImageTk.PhotoImage(img.resize((img.width//scale, img.height//scale)))
-canvas = tk.Canvas(
-    bg="black", width=2000, height=2000)
+canvas = tk.Canvas(bg="black", width=2000, height=2000)
 canvas.place(x=0, y=0)
 canvas.create_image(0, 0, image=img, anchor=tk.NW)
 root.geometry("{}x{}".format(800, 800))
-draw_rectangle(f[start_number-1])
+draw_rectangle(csv_list[start_number-1])
 canvas.bind('<Button-1>', click)  # 左クリック
 root.mainloop()

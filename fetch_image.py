@@ -5,18 +5,18 @@
 import os
 import shutil
 
-FROMPATH = "../data/temp".replace("/", os.sep)
-TOPATH = "../data/image".replace("/", os.sep)
+FROMPATH = "../data/temp"
+TOPATH = "../data/image"
 
 image_num = len(os.listdir(TOPATH))
 temp_num = len(os.listdir(FROMPATH))
 print("move images")
-print("image num : {}".format(temp_num))
-print("{} => {}".format(image_num, image_num+temp_num))
-for i, img in enumerate(os.listdir(FROMPATH)):
+print(f"image num : {temp_num}")
+print(f"{image_num} => {image_num+temp_num}")
+for i, img in enumerate(os.listdir(FROMPATH), start=1):
     # 移動先のフォルダに画像をコピー
     src = os.path.join(FROMPATH, img)
-    copy = os.path.join(TOPATH, "img{}.png".format(image_num+i+1))
+    copy = os.path.join(TOPATH, "img{}.png".format(image_num+i))
     shutil.copyfile(src, copy)
     # 移動元の画像を削除
     os.remove(os.path.join(FROMPATH, img))

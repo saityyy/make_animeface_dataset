@@ -9,15 +9,15 @@ import csv
 import tkinter as tk
 from PIL import Image, ImageTk
 
-IMAGEPATH = "../data/image".replace("/", os.sep)
-CSVPATH = "../data/target.csv".replace("/", os.sep)
+IMAGE_PATH = "../data/image"
+CSV_PATH = "../data/target.csv"
 scale = 4  # tkinterで表示する画像の縮小倍率
 
 parser = argparse.ArgumentParser()
 root = tk.Tk()
 
-id = None
-start_number = sum(1 for _ in open(CSVPATH))+1
+show_id = None
+start_number = sum(1 for _ in open(CSV_PATH))+1
 centerx, centery = 0, 0
 count = 0
 size = 0
@@ -27,14 +27,13 @@ def click(event):
     global centerx, centery, count, size, _img, img
     if not centerx == 0:
         index = start_number+count
-        with open(CSVPATH, 'a', newline="") as f:
+        with open(CSV_PATH, 'a', newline="") as f:
             writer = csv.writer(f)
             writer.writerow([index, scale*centerx, scale*centery, scale*size])
             print(count, scale*centerx, scale*centery, scale*size)
         centerx, centery = 0, 0
         count += 1
-        image = os.path.join(
-            IMAGEPATH, "img{}.png".format(index+1))
+        image = os.path.join(IMAGE_PATH, f"img{index+1}.png")
         print(index)
         img = Image.open(image)
         img = img.resize((img.width//scale, img.height//scale))
@@ -45,7 +44,7 @@ def click(event):
 
 
 def motion(event):
-    global centerx, centery, size, id, img
+    global size, show_id, img
     if not centerx == 0:
         x, y = centerx, centery
         prev_size = size
@@ -58,13 +57,13 @@ def motion(event):
             pass
         else:
             size = prev_size
-        if id is not None:
-            canvas.delete(id)
-        id = canvas.create_rectangle(
+        if show_id is not None:
+            canvas.delete(show_id)
+        show_id = canvas.create_rectangle(
             x-size, y-size, x+size, y+size)
 
 
-img_path = os.path.join(IMAGEPATH, "img{}.png".format(start_number))
+img_path = os.path.join(IMAGE_PATH, "img{}.png".format(start_number))
 img = Image.open(img_path)
 img = img.resize((img.width//scale, img.height//scale))
 _img = ImageTk.PhotoImage(img)

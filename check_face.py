@@ -11,22 +11,22 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 # 指定のフォルダから画像をランダムに参照する
-FROMPATH = ("D:/Project/MLProject/DataScience/data/GirlsImage"
-            .replace("/", os.sep))
-TOPATH = "../data/temp".replace("/", os.sep)
+FROMPATH = "D:/Project/MLProject/DataScience/data/GirlsImage"
+TOPATH = "../data/temp"
 
 root = tk.Tk()
 flist = os.listdir(FROMPATH)
 
 
 def random_name():
+    # 重複しないようなランダムなファイル名を生成する
     randlst = [random.choice(string.ascii_letters + string.digits)
                for i in range(10)]
     return ''.join(randlst)
 
 
 def next_img():
-    global img, img_path, flist
+    global img, img_path
     img_name = random.choice(flist)
     img_path = os.path.join(FROMPATH, img_name)
     img = Image.open(img_path)
@@ -35,7 +35,7 @@ def next_img():
 
 
 def add_image(event):
-    global img_path
+    #global img_path
     src = img_path
     copy = os.path.join(TOPATH, random_name()+".png")
     shutil.copyfile(src, copy)
