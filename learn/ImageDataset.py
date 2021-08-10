@@ -7,7 +7,7 @@ import cv2
 import random
 from tqdm import tqdm
 
-IMAGE_SIZE = 400
+IMAGE_SIZE = 800
 train_data_ratio = 0.8
 
 
@@ -68,18 +68,34 @@ class ImageDataset(Dataset):
             image = self.transform(image)
         return image, label
 
-    def imshow(self, idx):
+    def imshow(self, idx, pred=None):
         image = cv2.cvtColor(self.img[idx], cv2.COLOR_BGR2RGB)
         image = image.astype("int32")
         x, y, size = tuple((self.img_labels[idx]*IMAGE_SIZE).astype("int32"))
+        if pred is not None:
+            print(pred)
+            pred = tuple((pred*IMAGE_SIZE).astype("int32"))
+            x, y, size = pred
+            x = max(min(x+int(IMAGE_SIZE/2), IMAGE_SIZE), 0)
+            y = max(min(y+int(IMAGE_SIZE/2), IMAGE_SIZE), 0)
+            size = abs(size)
         print(x, y, size)
         for i in range(2*size):
-            image[y-size][x-size+i] = 0
-        for i in range(2*size):
-            image[y+size][x-size+i] = 0
-        for i in range(2*size):
-            image[y-size+i][x-size] = 0
-        for i in range(2*size):
-            image[y-size+i, x+size] = 0
+            try:
+                image[y-size, x-size+i] = 0
+            except:
+                pass
+            try:
+                image[y+size, x-size+i] = 0
+            except:
+                pass
+            try:
+                image[y-size+i, x-size] = 0
+            except:
+                pass
+            try:
+                image[y-size+i, x+size] = 0
+            except:
+                pass
         plt.imshow(image)
         plt.show()
