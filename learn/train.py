@@ -15,14 +15,16 @@ test_dataset = ImageDataset(CSV_PATH, IMAGE_PATH, False)
 
 batch_size = 32
 lr = 1e-3
-epochs = 30
+epochs = 100
 model = Model()
 trainer = TrainModel(model, train_dataset, test_dataset)
 trainer.setting(batch_size, lr)
 for i in tqdm(range(epochs)):
     trainer.train_loop()
     trainer.test_loop()
-loss = trainer.loss
-trainer.predict_face()
-plt.plot(loss)
+train_loss = trainer.train_loss
+test_loss = trainer.test_loss
+trainer.predict_face(5)
+plt.plot(train_loss)
+plt.plot(test_loss)
 plt.show()

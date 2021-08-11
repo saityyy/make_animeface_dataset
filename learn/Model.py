@@ -33,10 +33,10 @@ class Model(nn.Module):
             nn.Flatten(),
             nn.Linear(750, 256),
             nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.Dropout(0.3),
             nn.Linear(256, 32),
             nn.ReLU(),
-            nn.Dropout(0.2),
+            nn.Dropout(0.3),
             nn.Linear(32, 3),
         )
 
@@ -60,7 +60,7 @@ class IoULoss(nn.Module):
             tarx, tary, tar_size = tuple(targets[i])
             outx = max(min(outx+0.5, 1), 0)
             outy = max(min(outy+0.5, 1), 0)
-            out_size = max(0, out_size)
+            out_size = abs(out_size)
             if(outx+out_size > 1):
                 out_size = 1-outx
             if(outy+out_size > 1):
@@ -85,6 +85,6 @@ class IoULoss(nn.Module):
             f = f or right_tar < left_out or bottom_tar < top_out
             if f:
                 overlap_area = 0
-            loss += (1-(overlap_area/(outputs_area+targets_area -
-                     overlap_area+1e-3)))
+            union = outputs_area+targets_area - overlap_area
+            loss += (1-(overlap_area/(union+1e-7)))
         return loss

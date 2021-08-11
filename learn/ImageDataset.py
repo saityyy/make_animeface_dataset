@@ -79,6 +79,14 @@ class ImageDataset(Dataset):
             x = max(min(x+int(IMAGE_SIZE/2), IMAGE_SIZE), 0)
             y = max(min(y+int(IMAGE_SIZE/2), IMAGE_SIZE), 0)
             size = abs(size)
+            if(x+size > IMAGE_SIZE):
+                size = IMAGE_SIZE-x
+            if(y+size > IMAGE_SIZE):
+                size = IMAGE_SIZE-y
+            if(x-size < 0):
+                size = x
+            if(y-size < 0):
+                size = y
         print(x, y, size)
         for i in range(2*size):
             try:
