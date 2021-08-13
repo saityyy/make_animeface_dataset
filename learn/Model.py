@@ -1,4 +1,5 @@
 from torch import nn
+import torch
 
 
 class Model(nn.Module):
@@ -46,6 +47,25 @@ class Model(nn.Module):
         x = self.CNNlayer3(x)
         x = self.CNNlayer4(x)
         x = self.fc(x)
+        for i in range(len(x)):
+            outx = x[i][0].clone()
+            outy = x[i][1].clone()
+            out_size = x[i][2].clone()
+            outx = max(min(outx+0.5, 1), 0)
+            outy = max(min(outy+0.5, 1), 0)
+            out_size = abs(out_size)
+            if(outx+out_size > 1):
+                out_size = 1-outx
+            if(outy+out_size > 1):
+                out_size = 1-outy
+            if(outx-out_size < 0):
+                out_size = outx
+            if(outy-out_size < 0):
+                out_size = outy
+            x[i][0] = outx
+            x[i][1] = outy
+            x[i][2] = out_size
+
         return x
 
 
@@ -58,17 +78,6 @@ class IoULoss(nn.Module):
         for i in range(len(outputs)):
             outx, outy, out_size = tuple(outputs[i])
             tarx, tary, tar_size = tuple(targets[i])
-            outx = max(min(outx+0.5, 1), 0)
-            outy = max(min(outy+0.5, 1), 0)
-            out_size = abs(out_size)
-            if(outx+out_size > 1):
-                out_size = 1-outx
-            if(outy+out_size > 1):
-                out_size = 1-outy
-            if(outx-out_size < 0):
-                out_size = outx
-            if(outy-out_size < 0):
-                out_size = outy
             outputs_area = (2*out_size)**2
             targets_area = (2*tar_size)**2
             right_out, left_out = outx + out_size, outx-out_size

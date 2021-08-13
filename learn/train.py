@@ -1,6 +1,7 @@
 # %%
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import torch
 
 from ImageDataset import ImageDataset
 from Model import Model
@@ -24,7 +25,8 @@ for i in tqdm(range(epochs)):
     trainer.test_loop()
 train_loss = trainer.train_loss
 test_loss = trainer.test_loss
-trainer.predict_face(5)
+trainer.predict_face(10)
+torch.save(trainer.model.state_dict(), "weight.pt")
 plt.plot(train_loss)
 plt.plot(test_loss)
 plt.show()
