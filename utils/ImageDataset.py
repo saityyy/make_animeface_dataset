@@ -1,14 +1,14 @@
+from torch.utils import data
 from torch.utils.data import Dataset
 from torchvision.transforms import ToTensor
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 import cv2
-import random
 from tqdm import tqdm
 
-IMAGE_SIZE = 800
-train_data_ratio = 0.8
+IMAGE_SIZE = 400
+train_data_ratio = 0.9
 
 
 class ImageDataset(Dataset):
@@ -17,7 +17,14 @@ class ImageDataset(Dataset):
         self.csv_data = np.delete(self.csv_data, 0, 1)
         self.img = []
         self.img_labels = []
-        for i in tqdm(range(len(self.csv_data))):
+        data_num = len(self.csv_data)
+        partition = int(data_num*train_data_ratio)
+        print(partition)
+        if train_flag:
+            iter = range(partition)
+        else:
+            iter = range(partition, data_num)
+        for i in tqdm(iter):
             fetch_img = cv2.imread(os.path.join(img_dir, f"img{i+1}.png"))
             resize_img, label = self.clip_images(fetch_img, self.csv_data[i])
             self.img.append(resize_img)
@@ -25,37 +32,20 @@ class ImageDataset(Dataset):
         self.img = np.array(self.img, dtype="float32")
         self.img_labels = np.array(self.img_labels, dtype="float32")
         self.img_labels /= IMAGE_SIZE
-        # 訓練データとテストデータに分ける
-        partition = int(len(self.img)*train_data_ratio)
-        if train_flag:
-            self.img = self.img[:partition]
-            self.img_labels = self.img_labels[:partition]
-        else:
-            self.img = self.img[partition:]
-            self.img_labels = self.img_labels[partition:]
         self.transform = transform
         print(self.img.shape)
         print(self.img_labels.shape)
 
     def clip_images(self, img, label):
-        x, y, size = tuple(label)
         h, w, _ = tuple(img.shape)
-        new_label = None
         if h > w:
-            new_img_x = 0
-            start = max(y+size-w, 0)
-            end = min(y-size, h-w)
-            new_img_y = random.randrange(start, end+1)
-            new_label = [x, y-new_img_y, size]
-        else:
-            new_img_y = 0
-            start = max(x+size-h, 0)
-            end = min(x-size, w-h)
-            new_img_x = random.randrange(start, end+1)
-            new_label = [x-new_img_x, y, size]
-        img = img[new_img_y:new_img_y+min(h, w), new_img_x:new_img_x+min(h, w)]
-        new_label = list(map(lambda x: int(x*IMAGE_SIZE/min(h, w)), new_label))
+            add_tensor = np.zeros((h, h-w, 3))
+            img = np.concatenate([img, add_tensor], axis=1)
+        elif w > h:
+            add_tensor = np.zeros((w-h, w, 3))
+            img = np.concatenate([img, add_tensor], axis=0)
         img = cv2.resize(img, (IMAGE_SIZE, IMAGE_SIZE))
+        new_label = list(map(lambda x: int(x*IMAGE_SIZE/max(h, w)), label))
         return (img, new_label)
 
     def __len__(self):

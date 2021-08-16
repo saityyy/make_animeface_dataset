@@ -1,7 +1,10 @@
 import torch
 from torch.utils.data import DataLoader
 
-from Model import IoULoss
+from utils.Model import IoULoss
+
+
+alpha = 0.2
 
 
 class TrainModel:
@@ -33,6 +36,10 @@ class TrainModel:
             y = y.to(self.device).to(torch.float32)
             pred = self.model(X)
             loss = self.loss_fn(pred, y)
+            l2 = torch.tensor(0., requires_grad=True)
+            for w in self.model.parameters():
+                l2 = l2+torch.norm(w)**2
+            loss = loss+alpha*l2
             loss_sum += loss.item()
             self.optimizer.zero_grad()
             loss.backward()

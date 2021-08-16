@@ -8,10 +8,11 @@ import os
 import csv
 import tkinter as tk
 from PIL import Image, ImageTk
+from fetch_image import fetch_image
 
 IMAGE_PATH = "../data/image"
 CSV_PATH = "../data/target.csv"
-scale = 4  # tkinterで表示する画像の縮小倍率
+scale = 6  # tkinterで表示する画像の縮小倍率
 
 parser = argparse.ArgumentParser()
 root = tk.Tk()
@@ -63,6 +64,7 @@ def motion(event):
             x-size, y-size, x+size, y+size)
 
 
+fetch_image()
 img_path = os.path.join(IMAGE_PATH, "img{}.png".format(start_number))
 img = Image.open(img_path)
 img = img.resize((img.width//scale, img.height//scale))
