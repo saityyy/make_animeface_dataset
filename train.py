@@ -27,7 +27,7 @@ else:
 
 batch_size = 128
 lr = 1e-3
-epochs = 100
+epochs = 10
 model = Model()
 trainer = TrainModel(model, train_dataset, test_dataset)
 trainer.setting(batch_size, lr)

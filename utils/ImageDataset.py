@@ -7,7 +7,7 @@ import os
 import cv2
 from tqdm import tqdm
 
-IMAGE_SIZE = 400
+IMAGE_SIZE = 800
 train_data_ratio = 0.9
 
 
