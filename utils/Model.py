@@ -6,28 +6,34 @@ class Model(nn.Module):
         super(Model, self).__init__()
         self.loss = []
         self.acc = []
-        # input>400
+        # input>800
         self.CNNlayer1 = nn.Sequential(
             nn.Conv2d(3, 10, 45, stride=5),
             nn.BatchNorm2d(10),
             nn.ReLU(),
             nn.MaxPool2d(2, stride=2))
-        # output>36
+        # output>76
         self.CNNlayer2 = nn.Sequential(
             nn.Conv2d(10, 15, 9),
             nn.BatchNorm2d(15),
             nn.ReLU(),
             nn.MaxPool2d(2, stride=2))
-        # output>14
+        # output>34
         self.CNNlayer3 = nn.Sequential(
             nn.Conv2d(15, 20, 5),
             nn.BatchNorm2d(20),
             nn.ReLU(),
             nn.MaxPool2d(2, stride=2))
-        # output>5
+        # output>15
+        self.CNNlayer4 = nn.Sequential(
+            nn.Conv2d(20, 20, 4),
+            nn.BatchNorm2d(20),
+            nn.ReLU(),
+            nn.MaxPool2d(2, stride=2))
+        # output>6
         self.fc = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(500, 128),
+            nn.Linear(720, 128),
             nn.ReLU(),
             nn.Dropout(0.3),
             nn.Linear(128, 32),
@@ -40,6 +46,7 @@ class Model(nn.Module):
         x = self.CNNlayer1(x)
         x = self.CNNlayer2(x)
         x = self.CNNlayer3(x)
+        x = self.CNNlayer4(x)
         x = self.fc(x)
         for i in range(len(x)):
             outx = x[i][0].clone()
