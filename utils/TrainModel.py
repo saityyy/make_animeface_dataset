@@ -38,7 +38,7 @@ class TrainModel:
             loss = self.loss_fn(pred, y)
             l2 = torch.tensor(0., requires_grad=True)
             for w in self.model.parameters():
-                l2 = l2+torch.norm(w)**2
+                l2 = l2+torch.linalg.norm(w.flatten(), 2)
             loss = loss+alpha*l2
             loss_sum += loss.item()
             self.optimizer.zero_grad()
@@ -57,6 +57,7 @@ class TrainModel:
                 loss_sum += self.loss_fn(pred, y).item()
         self.count_epoch += 1
         self.test_loss.append(loss_sum/size)
+        print(loss_sum)
 
     def predict_face(self, show_num):
         self.test_dataloader = DataLoader(

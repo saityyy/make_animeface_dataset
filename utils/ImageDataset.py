@@ -7,7 +7,7 @@ import os
 import cv2
 from tqdm import tqdm
 
-IMAGE_SIZE = 800
+IMAGE_SIZE = 400
 train_data_ratio = 0.9
 
 
@@ -21,12 +21,13 @@ class ImageDataset(Dataset):
         partition = int(data_num*train_data_ratio)
         print(partition)
         if train_flag:
-            iter = range(partition)
+            iter = range(0, partition, 1)
         else:
-            iter = range(partition, data_num)
+            iter = range(partition, data_num, 1)
         for i in tqdm(iter):
             fetch_img = cv2.imread(os.path.join(img_dir, f"img{i+1}.png"))
-            resize_img, label = self.clip_images(fetch_img, self.csv_data[i])
+            resize_img, label = self.clip_images(
+                fetch_img, self.csv_data[i])
             self.img.append(resize_img)
             self.img_labels.append(label)
         self.img = np.array(self.img, dtype="float32")

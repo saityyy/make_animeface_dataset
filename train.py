@@ -25,16 +25,18 @@ else:
         train_dataset = pickle.load(f)
     with open('./test_dataset.pickle', 'rb')as f:
         test_dataset = pickle.load(f)
+    print(train_dataset.img.shape)
+    print(test_dataset.img.shape)
 # データセットを１から作成
 
 batch_size = 128
 lr = 1e-3
-epochs = 100
+epochs = 80
 
 model = Model()
 trainer = TrainModel(model, train_dataset, test_dataset)
 trainer.setting(batch_size, lr)
-for i in tqdm(range(epochs)):
+for i in range(epochs):
     trainer.train_loop()
     trainer.test_loop()
 

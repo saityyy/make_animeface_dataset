@@ -1,4 +1,5 @@
 from torch import nn
+import torch
 
 
 class Model(nn.Module):
@@ -6,47 +7,40 @@ class Model(nn.Module):
         super(Model, self).__init__()
         self.loss = []
         self.acc = []
-        # input>800
+        # input>400
         self.CNNlayer1 = nn.Sequential(
-            nn.Conv2d(3, 10, 45, stride=5),
-            nn.BatchNorm2d(10),
-            nn.ReLU(),
-            nn.MaxPool2d(2, stride=2))
-        # output>76
-        self.CNNlayer2 = nn.Sequential(
-            nn.Conv2d(10, 15, 9),
+            nn.Conv2d(3, 15, 65, stride=5),
             nn.BatchNorm2d(15),
             nn.ReLU(),
             nn.MaxPool2d(2, stride=2))
         # output>34
-        self.CNNlayer3 = nn.Sequential(
+        self.CNNlayer2 = nn.Sequential(
             nn.Conv2d(15, 20, 5),
             nn.BatchNorm2d(20),
             nn.ReLU(),
             nn.MaxPool2d(2, stride=2))
         # output>15
-        self.CNNlayer4 = nn.Sequential(
-            nn.Conv2d(20, 20, 4),
-            nn.BatchNorm2d(20),
+        self.CNNlayer3 = nn.Sequential(
+            nn.Conv2d(20, 25, 4),
+            nn.BatchNorm2d(25),
             nn.ReLU(),
             nn.MaxPool2d(2, stride=2))
         # output>6
         self.fc = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(720, 128),
+            nn.Linear(900, 256),
             nn.ReLU(),
-            nn.Dropout(0.3),
-            nn.Linear(128, 32),
+            nn.Dropout(0.2),
+            nn.Linear(256, 64),
             nn.ReLU(),
-            nn.Dropout(0.3),
-            nn.Linear(32, 3),
+            nn.Dropout(0.2),
+            nn.Linear(64, 3),
         )
 
     def forward(self, x):
         x = self.CNNlayer1(x)
         x = self.CNNlayer2(x)
         x = self.CNNlayer3(x)
-        x = self.CNNlayer4(x)
         x = self.fc(x)
         for i in range(len(x)):
             outx = x[i][0].clone()
@@ -85,16 +79,25 @@ class IoULoss(nn.Module):
             right_tar, left_tar = tarx+tar_size, tarx-tar_size
             bottom_out, top_out = outy + out_size, outy-out_size
             bottom_tar, top_tar = tary+tar_size, tary-tar_size
-            _, x1, x2, _ = tuple(
-                sorted([right_out, left_out, right_tar, left_tar]))
-            _, y1, y2, _ = tuple(
-                sorted([bottom_out, top_out, bottom_tar, top_tar]))
-            overlap_area = (x1-x2)*(y1-y2)
-            # 重なり合っていない場合
-            f = right_out < left_tar or bottom_out < top_tar
-            f = f or right_tar < left_out or bottom_tar < top_out
-            if f:
-                overlap_area = 0
+            w, h = 0, 0
+            if right_tar <= left_out:
+                w = 0
+            elif right_out <= left_tar:
+                w = 0
+            else:
+                _, x1, x2, _ = tuple(
+                    sorted([right_out, left_out, right_tar, left_tar]))
+                w = x2-x1
+            if top_tar >= bottom_out:
+                h = 0
+            elif top_out >= bottom_tar:
+                h = 0
+            else:
+                _, y1, y2, _ = tuple(
+                    sorted([bottom_out, top_out, bottom_tar, top_tar]))
+                h = y2-y1
+            overlap_area = w*h
             union = outputs_area+targets_area - overlap_area
-            loss += (1-(overlap_area/(union+1e-7)))
+            iou = overlap_area/(union+1e-7)
+            loss = loss - torch.log(iou+1e-7)
         return loss
