@@ -17,7 +17,7 @@ import pickle
 CSV_PATH = "../data/target.csv"
 IMAGE_PATH = "../data/image"
 IMAGE_SIZE = 400
-load_path = "./weight/weight0.688498674478746.pt"
+load_path = "./weight/{}".format(os.listdir("./weight")[0])
 
 model = Model()
 
@@ -30,6 +30,7 @@ def main():
 
 
 def predict(image_path):
+    print(load_path)
     img = cv2.imread(os.path.join(image_path))
     h, w, _ = tuple(img.shape)
     if h > w:

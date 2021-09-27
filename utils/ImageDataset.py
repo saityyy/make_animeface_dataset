@@ -18,7 +18,7 @@ class ImageDataset(Dataset):
         self.img = []
         self.img_labels = []
         data_num = len(self.csv_data)
-        partition = int(data_num*train_data_ratio)
+        partition = max(int(data_num*train_data_ratio), data_num-200)
         print(partition)
         if train_flag:
             iter = range(0, partition, 1)

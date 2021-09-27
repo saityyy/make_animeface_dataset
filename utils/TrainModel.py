@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from utils.Model import IoULoss
 
 
-alpha = 0.2
+alpha = 0.5
 
 
 class TrainModel:

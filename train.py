@@ -1,7 +1,7 @@
 # %%
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 import torch
+import os
 
 from utils.ImageDataset import ImageDataset
 from utils.Model import Model
@@ -11,7 +11,9 @@ import pickle
 
 CSV_PATH = "../data/target.csv"
 IMAGE_PATH = "../data/image"
-make_dataset_flag = False
+load_path = "./weight/{}".format(os.listdir("./weight")[0])
+
+make_dataset_flag = True
 # pickleデータでデータセット読み込み
 if make_dataset_flag:
     train_dataset = ImageDataset(CSV_PATH, IMAGE_PATH, True)
@@ -31,9 +33,11 @@ else:
 
 batch_size = 128
 lr = 1e-3
-epochs = 80
+epochs = 100
 
 model = Model()
+load_weights = torch.load(load_path)
+model.load_state_dict(load_weights)
 trainer = TrainModel(model, train_dataset, test_dataset)
 trainer.setting(batch_size, lr)
 for i in range(epochs):
@@ -44,6 +48,5 @@ train_loss = trainer.train_loss
 test_loss = trainer.test_loss
 trainer.predict_face(10)
 torch.save(trainer.model.state_dict(), f"./weight/weight{test_loss[-1]}.pt")
-plt.plot(train_loss)
 plt.plot(test_loss)
 plt.show()
