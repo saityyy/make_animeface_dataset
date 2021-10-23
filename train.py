@@ -2,16 +2,18 @@
 import matplotlib.pyplot as plt
 import torch
 import os
+import pickle
 
 from utils.ImageDataset import ImageDataset
 from utils.Model import Model
 from utils.TrainModel import TrainModel
-import pickle
 
 
 CSV_PATH = "../data/target.csv"
 IMAGE_PATH = "../data/image"
-load_path = "./weight/{}".format(os.listdir("./weight")[0])
+load_path = "./weight/resnet18.pth"
+load_path = "./weight/{}".format(os.listdir("./weight")[1])
+print(load_path)
 
 make_dataset_flag = True
 # pickleデータでデータセット読み込み
@@ -32,12 +34,13 @@ else:
 # データセットを１から作成
 
 batch_size = 128
-lr = 1e-3
-epochs = 100
+lr = 1e-4
+epochs = 300
 
 model = Model()
-load_weights = torch.load(load_path)
-model.load_state_dict(load_weights)
+weight = torch.load(load_path)
+# model.resnet18.load_state_dict(weight)
+model.load_state_dict(weight)
 trainer = TrainModel(model, train_dataset, test_dataset)
 trainer.setting(batch_size, lr)
 for i in range(epochs):

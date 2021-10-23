@@ -16,14 +16,14 @@ import pickle
 
 CSV_PATH = "../data/target.csv"
 IMAGE_PATH = "../data/image"
-IMAGE_SIZE = 400
-load_path = "./weight/{}".format(os.listdir("./weight")[0])
+IMAGE_SIZE = 100
+load_path = "./weight/{}".format(os.listdir("./weight")[1])
 
 model = Model()
 
 
 def main():
-    for i in os.listdir(IMAGE_PATH)[:3]:
+    for i in os.listdir(IMAGE_PATH)[:30]:
         img, _ = predict(os.path.join(IMAGE_PATH, i))
         plt.imshow(img)
         plt.show()
@@ -40,15 +40,16 @@ def predict(image_path):
         add_tensor = np.zeros((w-h, w, 3))
         img = np.concatenate([img, add_tensor], axis=0)
     original_size = img.shape[0]
-    img = cv2.resize(img, (IMAGE_SIZE, IMAGE_SIZE))
     img = img.astype(np.uint8)
+    resized_img = cv2.resize(img, (IMAGE_SIZE, IMAGE_SIZE))
     load_weights = torch.load(load_path)
     model.load_state_dict(load_weights)
-    x = ToTensor()(img).reshape(-1, 3, IMAGE_SIZE, IMAGE_SIZE)
+    x = ToTensor()(resized_img).reshape(-1, 3, IMAGE_SIZE, IMAGE_SIZE)
     pred = model(x).detach().numpy()[0]
     label = [-1]+list((original_size*pred).astype("int32"))
-    pred = tuple((pred*IMAGE_SIZE).astype("int32"))
+    pred = tuple((pred*original_size).astype("int32"))
     x, y, size = pred
+    print(pred)
     for i in range(2*size):
         try:
             img[y-size, x-size+i] = 0

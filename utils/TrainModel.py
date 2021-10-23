@@ -4,7 +4,8 @@ from torch.utils.data import DataLoader
 from utils.Model import IoULoss
 
 
-alpha = 0.5
+alpha = 0.3
+p = 1
 
 
 class TrainModel:
@@ -35,11 +36,11 @@ class TrainModel:
             X = X.to(self.device).to(torch.float32).requires_grad_(True)
             y = y.to(self.device).to(torch.float32)
             pred = self.model(X)
-            loss = self.loss_fn(pred, y)
-            l2 = torch.tensor(0., requires_grad=True)
+            loss, _ = self.loss_fn(pred, y)
+            l = torch.tensor(0., requires_grad=True)
             for w in self.model.parameters():
-                l2 = l2+torch.linalg.norm(w.flatten(), 2)
-            loss = loss+alpha*l2
+                l = l+torch.linalg.norm(w.flatten(), p)
+            loss = loss+alpha*l
             loss_sum += loss.item()
             self.optimizer.zero_grad()
             loss.backward()
@@ -49,15 +50,18 @@ class TrainModel:
     def test_loop(self):
         size = len(self.test_dataloader.dataset)
         loss_sum = 0
+        iou_sum = 0
         with torch.no_grad():
             for X, y in self.test_dataloader:
                 X = X.to(self.device).to(torch.float32)
                 y = y.to(self.device).to(torch.float32)
                 pred = self.model(X)
-                loss_sum += self.loss_fn(pred, y).item()
+                loss, iou = self.loss_fn(pred, y)
+                loss_sum += loss.item()
+                iou_sum += iou.item()
         self.count_epoch += 1
         self.test_loss.append(loss_sum/size)
-        print(loss_sum)
+        print(self.count_epoch, loss_sum/size, iou_sum/size)
 
     def predict_face(self, show_num):
         self.test_dataloader = DataLoader(

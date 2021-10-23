@@ -14,6 +14,7 @@ from predict_method import predict
 
 # 指定のフォルダから画像をランダムに参照する
 FROMPATH = "D:/Project/MLProject/DataScience/data/GirlsImage"
+FROMPATH = "C://Users//sec20/OneDrive/img"
 TOPATH = "../data/image"
 CSV_PATH = "../data/target.csv"
 
@@ -21,6 +22,7 @@ root = tk.Tk()
 flist = os.listdir(FROMPATH)
 start_number = sum(1 for _ in open(CSV_PATH))+1
 print(start_number)
+scale = 5
 count = 0
 
 
@@ -36,7 +38,8 @@ def next_img():
     img_name = random.choice(flist)
     img_path = os.path.join(FROMPATH, img_name)
     img, label = predict(img_path)
-    img = ImageTk.PhotoImage(Image.fromarray(img))
+    img = Image.fromarray(img)
+    img = ImageTk.PhotoImage(img.resize((img.width//scale, img.height//scale)))
     canvas.create_image(0, 0, image=img, anchor=tk.NW)
 
 
@@ -65,12 +68,13 @@ def no_add(event):
 img_name = random.choice(flist)
 img_path = os.path.join(FROMPATH, img_name)
 img, label = predict(img_path)
-img = ImageTk.PhotoImage(Image.fromarray(img))
+img = Image.fromarray(img)
+img = ImageTk.PhotoImage(img.resize((img.width//scale, img.height//scale)))
 canvas = tk.Canvas(
     bg="black", width=2000, height=2000)
 canvas.place(x=0, y=0)
 canvas.create_image(0, 0, image=img, anchor=tk.NW)
-root.geometry("{}x{}".format(400, 400))
+root.geometry("{}x{}".format(1000, 1000))
 canvas.bind('<Button-1>', add_image)  # 左クリック
 canvas.bind('<Button-3>', no_add)  # 右クリック
 root.mainloop()

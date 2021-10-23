@@ -1,5 +1,6 @@
 from torch import nn
 import torch
+import torchvision.models as models
 
 
 class Model(nn.Module):
@@ -7,28 +8,10 @@ class Model(nn.Module):
         super(Model, self).__init__()
         self.loss = []
         self.acc = []
-        # input>400
-        self.CNNlayer1 = nn.Sequential(
-            nn.Conv2d(3, 15, 65, stride=5),
-            nn.BatchNorm2d(15),
-            nn.ReLU(),
-            nn.MaxPool2d(2, stride=2))
-        # output>34
-        self.CNNlayer2 = nn.Sequential(
-            nn.Conv2d(15, 20, 5),
-            nn.BatchNorm2d(20),
-            nn.ReLU(),
-            nn.MaxPool2d(2, stride=2))
-        # output>15
-        self.CNNlayer3 = nn.Sequential(
-            nn.Conv2d(20, 25, 4),
-            nn.BatchNorm2d(25),
-            nn.ReLU(),
-            nn.MaxPool2d(2, stride=2))
-        # output>6
+        self.resnet18 = models.resnet18(pretrained=False)
         self.fc = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(900, 256),
+            nn.Linear(1000, 256),
             nn.ReLU(),
             nn.Dropout(0.2),
             nn.Linear(256, 64),
@@ -38,9 +21,7 @@ class Model(nn.Module):
         )
 
     def forward(self, x):
-        x = self.CNNlayer1(x)
-        x = self.CNNlayer2(x)
-        x = self.CNNlayer3(x)
+        x = self.resnet18(x)
         x = self.fc(x)
         for i in range(len(x)):
             outx = x[i][0].clone()
@@ -70,6 +51,7 @@ class IoULoss(nn.Module):
 
     def forward(self, outputs, targets):
         loss = 0
+        iou_sum = 0
         for i in range(len(outputs)):
             outx, outy, out_size = tuple(outputs[i])
             tarx, tary, tar_size = tuple(targets[i])
@@ -99,5 +81,6 @@ class IoULoss(nn.Module):
             overlap_area = w*h
             union = outputs_area+targets_area - overlap_area
             iou = overlap_area/(union+1e-7)
+            iou_sum += iou
             loss = loss - torch.log(iou+1e-7)
-        return loss
+        return loss, iou_sum

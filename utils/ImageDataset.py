@@ -7,7 +7,7 @@ import os
 import cv2
 from tqdm import tqdm
 
-IMAGE_SIZE = 400
+IMAGE_SIZE = 200
 train_data_ratio = 0.9
 
 
@@ -18,7 +18,7 @@ class ImageDataset(Dataset):
         self.img = []
         self.img_labels = []
         data_num = len(self.csv_data)
-        partition = max(int(data_num*train_data_ratio), data_num-200)
+        partition = max(int(data_num*train_data_ratio), data_num-300)
         print(partition)
         if train_flag:
             iter = range(0, partition, 1)
