@@ -13,7 +13,7 @@ CSV_PATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
 DATASET_PATH = os.path.join(os.path.dirname(__file__), "data/predictFaceDB")
 IMAGE_SIZE = 200
 split_ratio = 0.9
-allow_aspect_ratio = 1.1
+allow_aspect_ratio = 1.4
 
 
 def transform_image(img_path):
@@ -29,13 +29,20 @@ def transform_image(img_path):
     return img
 
 
+def aspect_ratio_check(aspect_ratio, img_path) -> bool:
+    img = Image.open(img_path)
+    wh = [img.width, img.height]
+    if max(wh)/min(wh) <= allow_aspect_ratio:
+        return True
+    else:
+        return False
+
+
 def make_predictFaceDB(face_data):
     data_index_list = []
     for index in range(len(face_data)):
         img_name = f"img{index+1}.png"
-        img = Image.open(os.path.join(IMAGE_PATH, img_name))
-        wh = [img.width, img.height]
-        if max(wh)/min(wh) <= allow_aspect_ratio:
+        if aspect_ratio_check(allow_aspect_ratio, os.path.join(IMAGE_PATH, img_name)):
             data_index_list.append(index)
     print(len(data_index_list))
 

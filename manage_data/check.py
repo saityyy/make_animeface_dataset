@@ -10,17 +10,15 @@ from PIL import Image, ImageTk
 
 IMAGEPATH = os.path.join(os.path.dirname(__file__), "data/image")
 CSVPATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
-# IMAGEPATH = os.path.join(os.path.dirname(
-# __file__), "data/predictFaceDB/val/image")
-# CSVPATH = os.path.join(os.path.dirname(__file__),
-# "data/predictFaceDB/val/face_data.csv")
+PAGE_SCALE = 500
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-i', '--index', type=int,
-                    default=f"{len(os.listdir(IMAGEPATH))-10}", help="select index to start showing")
+parser.add_argument('-i', '--check_index', type=int,
+                    default=f"{len(os.listdir(IMAGEPATH))-10}", help="select index to start showing.default -> [-10:]")
 parser.add_argument('-d', '--delete', type=int, default=-1,
                     help="select index of image to be deleted")
-PAGE_SCALE = 500
+parser.add_argument('-c', '--change_path', default="data",
+                    help="you can check or delete predictFaceDB. select 'train' or 'val'")
 
 
 class Check:
@@ -35,6 +33,7 @@ class Check:
     def __call__(self):
         self.canvas.place(x=0, y=0)
         self.img = self.select_image()
+        print(f'image index : {self.image_index}')
         self.canvas.create_image(0, 0, image=self.img, anchor=tk.NW)
         self.root.geometry("{}x{}".format(PAGE_SCALE, PAGE_SCALE))
         self.draw_rectangle(self.csv_list[self.image_index-1])
@@ -47,8 +46,10 @@ class Check:
         try:
             img = Image.open(self.img_path)
         except FileNotFoundError:
-            print("exit")
-            exit()
+            self.image_index = 1
+            self.img_path = os.path.join(
+                IMAGEPATH, f"img{self.image_index}.png")
+            img = Image.open(self.img_path)
         self.scale = max(img.width, img.height)/PAGE_SCALE
         self.img_width = int(img.width/self.scale)
         self.img_height = int(img.height/self.scale)
@@ -58,6 +59,7 @@ class Check:
 
     def click(self, event):
         self.img = self.select_image()
+        print(f'image index : {self.image_index}')
         self.canvas.create_image(0, 0, image=self.img, anchor=tk.NW)
         self.draw_rectangle(self.csv_list[self.image_index-1])
 
@@ -90,11 +92,25 @@ def delete(number, csv_list):
     exit()
 
 
+def get_data_path(sub_dir):
+    image_path = os.path.join(os.path.dirname(__file__), sub_dir['image'])
+    csv_path = os.path.join(os.path.dirname(__file__), sub_dir['csv'])
+    return image_path, csv_path
+
+
 if __name__ == "__main__":
     args = parser.parse_args()
+    if args.change_path == "train" or args.change_path == "val":
+        sub_dir = {
+            'image': f'data/predictFaceDB/{args.change_path}/image',
+            'csv': f'data/predictFaceDB/{args.change_path}/face_data.csv'
+        }
+        IMAGEPATH, CSVPATH = get_data_path(sub_dir)
+        N = len(os.listdir(IMAGEPATH))
+        args.check_index = args.check_index if args.check_index <= N else N-10
     csv_file = open(CSVPATH, "r", newline="")
     csv_list = list(csv.reader(csv_file, delimiter=","))
     if args.delete != -1:
         delete(args.delete, csv_list)
-    check = Check(args.index, csv_list)
+    check = Check(args.check_index, csv_list)
     check()
