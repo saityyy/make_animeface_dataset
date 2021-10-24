@@ -2,7 +2,6 @@
 # 一回目のクリックで矩形出現
 # 二回目にクリックで矩形の座標やサイズが確定。csvに記録
 
-import argparse
 import shutil
 import os
 import csv
@@ -12,19 +11,16 @@ from PIL import Image, ImageTk
 TEMP_PATH = os.path.join(os.path.dirname(__file__), "data/temp")
 IMAGE_PATH = os.path.join(os.path.dirname(__file__), "data/image")
 CSV_PATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
-scale = 6  # tkinterで表示する画像の縮小倍率
-
-parser = argparse.ArgumentParser()
 
 
 class Annotation:
-    def __init__(self, scale):
+    def __init__(self):
         self.show_id = None
-        self.start_index = sum(1 for _ in open(CSV_PATH))+1
-        self.img_index = self.start_index
+        self.start_index = sum(1 for _ in open(CSV_PATH))
+        self.img_index = self.start_index+1
         self.centerx, self.centery, self.size = 0, 0, 0
         self.first_temp_num = len(os.listdir(TEMP_PATH))
-        self.scale = scale
+        self.scale = 1
         self.root = tk.Tk()
         self.image_scandir_iter = os.scandir(TEMP_PATH)
         self.canvas = tk.Canvas(
@@ -62,19 +58,24 @@ class Annotation:
             print("temp folder is empty")
             exit()
         img = Image.open(self.img_path)
-        self.img_width, self.img_height = img.width, img.height
+        self.scale = max(img.width, img.height)/500
+        self.img_width = int(img.width/self.scale)
+        self.img_height = int(img.height/self.scale)
+        print(img.width, img.height)
+        print(self.img_width, self.img_height)
         img = ImageTk.PhotoImage(
-            img.resize((img.width//scale, img.height//scale)))
+            img.resize((self.img_width, self.img_height)))
         return img
 
     def click(self, event):
         if not self.centerx == 0:
-            cx, cy, size = self.centerx, self.centery, self.size
+            cx, cy, size = tuple(
+                map(int, [self.scale*self.centerx, self.scale*self.centery, self.scale*self.size]))
             with open(CSV_PATH, 'a', newline="") as f:
                 writer = csv.writer(f)
                 writer.writerow(
-                    [self.img_index, scale*cx, scale*cy, scale*size])
-                print(self.img_index, scale*cx, scale*cy, scale*size)
+                    [self.img_index, cx, cy, size])
+                print(self.img_index, cx, cy, size)
             self.centerx, self.centery, self.size = 0, 0, 0
             self.temp2image()
             self.img_index += 1
@@ -101,7 +102,7 @@ class Annotation:
 
 
 if __name__ == "__main__":
-    at = Annotation(scale)
+    at = Annotation()
     try:
         at()
     finally:

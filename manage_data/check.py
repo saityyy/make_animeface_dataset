@@ -12,49 +12,64 @@ IMAGEPATH = os.path.join(os.path.dirname(__file__), "data/image")
 CSVPATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('start_number', type=int,
-                    default="1")
-
-args = parser.parse_args()
-start_number = args.start_number
-root = tk.Tk()
-
-scale = 3  # tkinterで表示する画像の縮小倍率
-count = 0
-show_id = None
+parser.add_argument('-i', '--index', type=int,
+                    default=f"{len(os.listdir(IMAGEPATH))-10}", help="select index to start showing")
+parser.add_argument('-d', '--delete', type=int, default=-1,
+                    help="select index of image to be deleted")
+PAGE_SCALE = 500
 
 
-def click(event):
-    global count, img
-    count += 1
-    next_img_index = start_number+count
-    if next_img_index-1 >= len(csv_list):
-        print("exit")
-        exit()
-    image = os.path.join(
-        IMAGEPATH, "img{}.png".format(next_img_index))
-    img = Image.open(image)
-    img = ImageTk.PhotoImage(img.resize((img.width//scale, img.height//scale)))
-    canvas.create_image(0, 0, image=img, anchor=tk.NW)
-    draw_rectangle(csv_list[next_img_index-1])
+class Check:
+    def __init__(self, start_number, csv_list):
+        self.root = tk.Tk()
+        self.image_index = min(start_number, len(csv_list))
+        self.scale = 1
+        self.show_id = None
+        self.csv_list = csv_list
+        self.canvas = tk.Canvas(bg="black", width=2000, height=2000)
+
+    def __call__(self):
+        self.canvas.place(x=0, y=0)
+        self.img = self.select_image()
+        self.canvas.create_image(0, 0, image=self.img, anchor=tk.NW)
+        self.root.geometry("{}x{}".format(PAGE_SCALE, PAGE_SCALE))
+        self.draw_rectangle(self.csv_list[self.image_index-1])
+        self.canvas.bind('<Button-1>', self.click)  # 左クリック
+        self.canvas.bind('<Button-3>', self.click)  # 右クリック
+        self.root.mainloop()
+
+    def select_image(self):
+        self.img_path = os.path.join(IMAGEPATH, f"img{self.image_index}.png")
+        try:
+            img = Image.open(self.img_path)
+        except FileNotFoundError:
+            print("exit")
+            exit()
+        self.scale = max(img.width, img.height)/PAGE_SCALE
+        self.img_width = int(img.width/self.scale)
+        self.img_height = int(img.height/self.scale)
+        img = ImageTk.PhotoImage(
+            img.resize((self.img_width, self.img_height)))
+        return img
+
+    def click(self, event):
+        self.img = self.select_image()
+        self.canvas.create_image(0, 0, image=self.img, anchor=tk.NW)
+        self.draw_rectangle(self.csv_list[self.image_index-1])
+
+    def draw_rectangle(self, data):
+        self.image_index += 1
+        data = list(map(int, data))
+        cx = int(data[1]/self.scale)
+        cy = int(data[2]/self.scale)
+        size = int(data[3]/self.scale)
+        if self.show_id is not None:
+            self.canvas.delete(self.show_id)
+        self.show_id = self.canvas.create_rectangle(
+            cx-size, cy-size, cx+size, cy+size)
 
 
-def draw_rectangle(data):
-    global show_id
-    centerx = int(data[1])//scale
-    centery = int(data[2])//scale
-    size = int(data[3])//scale
-    print(data)
-    if show_id is not None:
-        canvas.delete(show_id)
-    show_id = canvas.create_rectangle(
-        centerx-size, centery-size, centerx+size, centery+size)
-
-
-def delete(event):
-    # 画像を削除したいときは↓を消す
-    click(event)
-    number = start_number+count
+def delete(number, csv_list):
     end_data = csv_list[-1]
     csv_list[number-1] = end_data
     csv_list[number-1][0] = number
@@ -71,17 +86,11 @@ def delete(event):
     exit()
 
 
-csv_file = open(CSVPATH, "r", newline="")
-csv_list = list(csv.reader(csv_file, delimiter=","))
-start_number = min(start_number, len(csv_list))
-img_path = os.path.join(IMAGEPATH, f"img{start_number}.png")
-img = Image.open(img_path)
-img = ImageTk.PhotoImage(img.resize((img.width//scale, img.height//scale)))
-canvas = tk.Canvas(bg="black", width=2000, height=2000)
-canvas.place(x=0, y=0)
-canvas.create_image(0, 0, image=img, anchor=tk.NW)
-root.geometry("{}x{}".format(800, 800))
-draw_rectangle(csv_list[start_number-1])
-canvas.bind('<Button-1>', click)  # 左クリック
-canvas.bind('<Button-3>', delete)  # 左クリック
-root.mainloop()
+if __name__ == "__main__":
+    args = parser.parse_args()
+    csv_file = open(CSVPATH, "r", newline="")
+    csv_list = list(csv.reader(csv_file, delimiter=","))
+    if args.delete != -1:
+        delete(args.delete, csv_list)
+    check = Check(args.index, csv_list)
+    check()
