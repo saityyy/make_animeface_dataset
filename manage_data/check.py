@@ -10,6 +10,10 @@ from PIL import Image, ImageTk
 
 IMAGEPATH = os.path.join(os.path.dirname(__file__), "data/image")
 CSVPATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
+# IMAGEPATH = os.path.join(os.path.dirname(
+# __file__), "data/predictFaceDB/val/image")
+# CSVPATH = os.path.join(os.path.dirname(__file__),
+# "data/predictFaceDB/val/face_data.csv")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--index', type=int,

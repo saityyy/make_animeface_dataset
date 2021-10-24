@@ -1,5 +1,7 @@
+import pandas as pd
 from torch.utils import data
 from torch.utils.data import Dataset
+from torchvision import transforms
 from torchvision.transforms import ToTensor
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,32 +12,19 @@ from tqdm import tqdm
 IMAGE_SIZE = 200
 train_data_ratio = 0.9
 
+transform = transforms.Compose([
+
+    ToTensor()
+])
+
 
 class ImageDataset(Dataset):
     def __init__(self, csv_file_path, img_dir, train_flag, transform=ToTensor()):
         self.csv_data = np.loadtxt(csv_file_path, delimiter=',')
         self.csv_data = np.delete(self.csv_data, 0, 1)
-        self.img = []
-        self.img_labels = []
-        data_num = len(self.csv_data)
-        partition = max(int(data_num*train_data_ratio), data_num-300)
-        print(partition)
-        if train_flag:
-            iter = range(0, partition, 1)
-        else:
-            iter = range(partition, data_num, 1)
-        for i in tqdm(iter):
-            fetch_img = cv2.imread(os.path.join(img_dir, f"img{i+1}.png"))
-            resize_img, label = self.clip_images(
-                fetch_img, self.csv_data[i])
-            self.img.append(resize_img)
-            self.img_labels.append(label)
-        self.img = np.array(self.img, dtype="float32")
-        self.img_labels = np.array(self.img_labels, dtype="float32")
-        self.img_labels /= IMAGE_SIZE
+        self.face_data = pd.read_csv(csv_file_path)
+        self.img_path = img_dir
         self.transform = transform
-        print(self.img.shape)
-        print(self.img_labels.shape)
 
     def clip_images(self, img, label):
         h, w, _ = tuple(img.shape)
