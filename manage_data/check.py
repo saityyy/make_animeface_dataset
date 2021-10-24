@@ -8,8 +8,8 @@ import argparse
 import tkinter as tk
 from PIL import Image, ImageTk
 
-IMAGEPATH = "../data/image"
-CSVPATH = "../data/target.csv"
+IMAGEPATH = os.path.join(os.path.dirname(__file__), "data/image")
+CSVPATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('start_number', type=int,

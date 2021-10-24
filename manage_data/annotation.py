@@ -1,79 +1,109 @@
-# python annotation.py
+# tempフォルダーから画像を取ってきてアノテーションをする。
 # 一回目のクリックで矩形出現
 # 二回目にクリックで矩形の座標やサイズが確定。csvに記録
-# fetch_numの数だけimageフォルダから読み込む
 
 import argparse
+import shutil
 import os
 import csv
 import tkinter as tk
 from PIL import Image, ImageTk
-from fetch_image import fetch_image
 
-IMAGE_PATH = "../data/image"
-CSV_PATH = "../data/target.csv"
+TEMP_PATH = os.path.join(os.path.dirname(__file__), "data/temp")
+IMAGE_PATH = os.path.join(os.path.dirname(__file__), "data/image")
+CSV_PATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
 scale = 6  # tkinterで表示する画像の縮小倍率
 
 parser = argparse.ArgumentParser()
-root = tk.Tk()
-
-show_id = None
-start_number = sum(1 for _ in open(CSV_PATH))+1
-centerx, centery = 0, 0
-count = 0
-size = 0
 
 
-def click(event):
-    global centerx, centery, count, size, _img, img
-    if not centerx == 0:
-        index = start_number+count
-        with open(CSV_PATH, 'a', newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow([index, scale*centerx, scale*centery, scale*size])
-            print(count, scale*centerx, scale*centery, scale*size)
-        centerx, centery = 0, 0
-        count += 1
-        image = os.path.join(IMAGE_PATH, f"img{index+1}.png")
-        print(index)
-        img = Image.open(image)
-        img = img.resize((img.width//scale, img.height//scale))
-        _img = ImageTk.PhotoImage(img)
-        canvas.create_image(0, 0, image=_img, anchor=tk.NW)
-    else:
-        centerx, centery = event.x, event.y
+class Annotation:
+    def __init__(self, scale):
+        self.show_id = None
+        self.start_index = sum(1 for _ in open(CSV_PATH))+1
+        self.img_index = self.start_index
+        self.centerx, self.centery, self.size = 0, 0, 0
+        self.first_temp_num = len(os.listdir(TEMP_PATH))
+        self.scale = scale
+        self.root = tk.Tk()
+        self.image_scandir_iter = os.scandir(TEMP_PATH)
+        self.canvas = tk.Canvas(
+            bg="black", width=4000, height=4000)
 
+    @property
+    def current_temp_num(self):
+        return len(os.listdir(TEMP_PATH))
 
-def motion(event):
-    global size, show_id, img
-    if not centerx == 0:
-        x, y = centerx, centery
-        prev_size = size
-        size = abs(centerx-event.x)
-        w = img.width
-        h = img.height
-        window_check = size < x < w-size
-        window_check &= size < y < h-size
-        if window_check:
-            pass
+    @property
+    def current_image_num(self):
+        return len(os.listdir(IMAGE_PATH))
+
+    def __call__(self):
+        self.canvas.place(x=0, y=0)
+        self.img = self.select_image()
+        self.canvas.create_image(0, 0, image=self.img, anchor=tk.NW)
+        self.root.geometry("{}x{}".format(800, 800))
+        self.canvas.bind('<Button-1>', self.click)  # 左クリック
+        self.canvas.bind('<Motion>', self.motion)  # カーソル移動時
+        self.root.mainloop()
+
+    # アノテーションした画像をIMAGEPATHに移動させる。
+    def temp2image(self):
+        src = self.img_path
+        dst = os.path.join(IMAGE_PATH, "img{}.png".format(self.img_index))
+        shutil.copyfile(src, dst)
+        os.remove(self.img_path)
+
+    # tempフォルダーの画像を一枚読み込む。
+    def select_image(self):
+        try:
+            self.img_path = next(self.image_scandir_iter).path
+        except StopIteration:
+            print("temp folder is empty")
+            exit()
+        img = Image.open(self.img_path)
+        self.img_width, self.img_height = img.width, img.height
+        img = ImageTk.PhotoImage(
+            img.resize((img.width//scale, img.height//scale)))
+        return img
+
+    def click(self, event):
+        if not self.centerx == 0:
+            cx, cy, size = self.centerx, self.centery, self.size
+            with open(CSV_PATH, 'a', newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(
+                    [self.img_index, scale*cx, scale*cy, scale*size])
+                print(self.img_index, scale*cx, scale*cy, scale*size)
+            self.centerx, self.centery, self.size = 0, 0, 0
+            self.temp2image()
+            self.img_index += 1
+            self.img = self.select_image()
+            self.canvas.create_image(0, 0, image=self.img, anchor=tk.NW)
         else:
-            size = prev_size
-        if show_id is not None:
-            canvas.delete(show_id)
-        show_id = canvas.create_rectangle(
-            x-size, y-size, x+size, y+size)
+            self.centerx, self.centery = event.x, event.y
+
+    def motion(self, event):
+        if not self.centerx == 0:
+            x, y, size = self.centerx, self.centery, self.size
+            new_size = abs(self.centerx-event.x)
+            w, h = self.img_width, self.img_height
+            window_check = new_size < x < w-new_size
+            window_check &= new_size < y < h-new_size
+            if window_check:
+                self.size = new_size
+            else:
+                self.size = size
+            if self.show_id is not None:
+                self.canvas.delete(self.show_id)
+            self.show_id = self.canvas.create_rectangle(
+                x-size, y-size, x+size, y+size)
 
 
-fetch_image()
-img_path = os.path.join(IMAGE_PATH, "img{}.png".format(start_number))
-img = Image.open(img_path)
-img = img.resize((img.width//scale, img.height//scale))
-_img = ImageTk.PhotoImage(img)
-canvas = tk.Canvas(
-    bg="black", width=4000, height=4000)
-canvas.place(x=0, y=0)
-canvas.create_image(0, 0, image=_img, anchor=tk.NW)
-root.geometry("{}x{}".format(800, 800))
-canvas.bind('<Button-1>', click)  # 左クリック
-canvas.bind('<Motion>', motion)  # カーソル移動時
-root.mainloop()
+if __name__ == "__main__":
+    at = Annotation(scale)
+    try:
+        at()
+    finally:
+        print(f"image num : {at.start_index} -> {at.current_image_num}")
+        print(f"temp num : {at.first_temp_num} -> {at.current_temp_num}")
