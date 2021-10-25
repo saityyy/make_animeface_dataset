@@ -11,9 +11,8 @@ import matplotlib.pyplot as plt
 IMAGE_PATH = os.path.join(os.path.dirname(__file__), "data/image")
 CSV_PATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
 DATASET_PATH = os.path.join(os.path.dirname(__file__), "data/predictFaceDB")
-IMAGE_SIZE = 200
 split_ratio = 0.9
-allow_aspect_ratio = 1.0
+allow_aspect_ratio = 1.4
 
 
 def transform_image(img_path):

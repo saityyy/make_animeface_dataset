@@ -1,7 +1,8 @@
+import random
 import torch
 from torch.utils.data import DataLoader
 
-from utils.Model import IoULoss
+from utils.IoULoss import IoULoss
 
 
 alpha = 0.3
@@ -21,10 +22,11 @@ class TrainModel:
 
     def setting(self, batch_size, learning_rate):
         self.learning_rate = learning_rate
+        self.batch_size = batch_size
         self.train_dataloader = DataLoader(
-            self.train_dataset, batch_size=batch_size, shuffle=True)
+            self.train_dataset, batch_size=self.batch_size, shuffle=True)
         self.test_dataloader = DataLoader(
-            self.test_dataset, batch_size=batch_size, shuffle=True)
+            self.test_dataset, batch_size=self.batch_size, shuffle=True)
         self.loss_fn = IoULoss()
         self.optimizer = torch.optim.Adam(
             self.model.parameters(), lr=self.learning_rate)
@@ -34,7 +36,7 @@ class TrainModel:
         loss_sum = 0
         for batch, (X, y) in enumerate(self.train_dataloader):
             X = X.to(self.device).to(torch.float32).requires_grad_(True)
-            y = y.to(self.device).to(torch.float32)
+            y = y.to(self.device).to(torch.float32).requires_grad_(True)
             pred = self.model(X)
             loss, _ = self.loss_fn(pred, y)
             l = torch.tensor(0., requires_grad=True)
@@ -61,11 +63,12 @@ class TrainModel:
                 iou_sum += iou.item()
         self.count_epoch += 1
         self.test_loss.append(loss_sum/size)
-        print(self.count_epoch, loss_sum/size, iou_sum/size)
+        a, b, c = self.count_epoch, loss_sum/size, iou_sum/size
+        print(f"epoch : {a} loss : {b} IoU Loss : {c}")
 
     def predict_face(self, show_num):
         self.test_dataloader = DataLoader(
-            self.test_dataset, batch_size=show_num, shuffle=False)
+            self.test_dataset, batch_size=self.batch_size, shuffle=False)
         with torch.no_grad():
             for X, y in self.test_dataloader:
                 X = X.to(self.device).to(torch.float32)
@@ -73,5 +76,7 @@ class TrainModel:
                 pred = self.model(X)
                 break
         pred = pred.to("cpu").detach().numpy().copy()
-        for i in range(show_num):
-            self.test_dataset.imshow(i, pred[i])
+        print(len(pred))
+        show_list = random.sample(range(len(pred)), k=show_num)
+        for i in show_list:
+            self.test_dataset.image_show(i, pred[i])

@@ -1,3 +1,5 @@
+from torchvision.transforms import ToTensor
+import torch
 from torchvision.io import read_image
 import os
 import pandas as pd
@@ -13,13 +15,10 @@ print(df.loc[:, 'x'])
 df = pd.DataFrame({'a': [1, 2, 3], 'b': [4, 5, 6]})
 
 
-class test:
-    def __init__(self):
-        self.a = list(range(10))
-
-    def __getitem__(self, idx):
-        return os.path.join("./test", f"{self.a[idx]}.txt")
-
-
-a = test()
-print(a[:3])
+a = torch.zeros((5, 6))
+b = []
+for _ in range(7):
+    b.append(a)
+print(b)
+b = torch.stack(b)
+print(b.shape)
