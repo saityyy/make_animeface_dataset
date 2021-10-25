@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import torch
 import os
 import pickle
-from utils.ImageDataset import ImageDataset
+from utils.predictFaceDataset import ImageDataset
 from utils.Model import Model
 from utils.TrainModel import TrainModel
 

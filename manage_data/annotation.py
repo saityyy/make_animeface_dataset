@@ -8,8 +8,6 @@ import csv
 import tkinter as tk
 from PIL import Image, ImageTk
 
-from manage_data.check import IMAGEPATH
-
 DATA_PATH = os.path.join(os.path.dirname(__file__), "data")
 TEMP_PATH = os.path.join(DATA_PATH, "temp")
 IMAGE_PATH = os.path.join(DATA_PATH, "image")
@@ -21,7 +19,7 @@ class Annotation:
         if not os.path.isdir(DATA_PATH):
             os.mkdir(DATA_PATH)
             os.mkdir(TEMP_PATH)
-            os.mkdir(IMAGEPATH)
+            os.mkdir(IMAGE_PATH)
             with open(CSV_PATH, 'w', newline="") as f:
                 writer = csv.writer(f)
                 writer.writerow(["index", "x", "y", "size"])
@@ -54,7 +52,7 @@ class Annotation:
         self.canvas.bind('<Motion>', self.motion)  # カーソル移動時
         self.root.mainloop()
 
-    # アノテーションした画像をIMAGEPATHに移動させる。
+    # アノテーションした画像をIMAGE_PATHに移動させる。
     def temp2image(self):
         src = self.img_path
         dst = os.path.join(IMAGE_PATH, "img{}.png".format(self.img_index))

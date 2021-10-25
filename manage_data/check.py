@@ -8,13 +8,13 @@ import argparse
 import tkinter as tk
 from PIL import Image, ImageTk
 
-IMAGEPATH = os.path.join(os.path.dirname(__file__), "data/image")
+IMAGE_PATH = os.path.join(os.path.dirname(__file__), "data/image")
 CSVPATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
 PAGE_SCALE = 500
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--check_index', type=int,
-                    default=f"{len(os.listdir(IMAGEPATH))-10}", help="select index to start showing.default -> [-10:]")
+                    default=f"{len(os.listdir(IMAGE_PATH))-10}", help="select index to start showing.default -> [-10:]")
 parser.add_argument('-d', '--delete', type=int, default=-1,
                     help="select index of image to be deleted")
 parser.add_argument('-c', '--change_path', default="data",
@@ -42,13 +42,13 @@ class Check:
         self.root.mainloop()
 
     def select_image(self):
-        self.img_path = os.path.join(IMAGEPATH, f"img{self.image_index}.png")
+        self.img_path = os.path.join(IMAGE_PATH, f"img{self.image_index}.png")
         try:
             img = Image.open(self.img_path)
         except FileNotFoundError:
             self.image_index = 1
             self.img_path = os.path.join(
-                IMAGEPATH, f"img{self.image_index}.png")
+                IMAGE_PATH, f"img{self.image_index}.png")
             img = Image.open(self.img_path)
         self.scale = max(img.width, img.height)/PAGE_SCALE
         self.img_width = int(img.width/self.scale)
@@ -80,10 +80,10 @@ def delete(number, csv_list):
     csv_list[number-1] = end_data
     csv_list[number-1][0] = number
     csv_list.pop()
-    total_img = len(os.listdir(IMAGEPATH))
-    remove_img_path = os.path.join(IMAGEPATH, "img{}.png".format(number))
+    total_img = len(os.listdir(IMAGE_PATH))
+    remove_img_path = os.path.join(IMAGE_PATH, "img{}.png".format(number))
     os.remove(remove_img_path)
-    os.rename(os.path.join(IMAGEPATH, "img{}.png".format(total_img)),
+    os.rename(os.path.join(IMAGE_PATH, "img{}.png".format(total_img)),
               remove_img_path)
     with open(CSVPATH, 'w', newline='')as f:
         writer = csv.writer(f)
@@ -106,8 +106,8 @@ if __name__ == "__main__":
             'image': f'data/predictFaceDB/{args.change_path}/image',
             'csv': f'data/predictFaceDB/{args.change_path}/face_data.csv'
         }
-        IMAGEPATH, CSVPATH = get_data_path(sub_dir)
-        N = len(os.listdir(IMAGEPATH))
+        IMAGE_PATH, CSVPATH = get_data_path(sub_dir)
+        N = len(os.listdir(IMAGE_PATH))
         args.check_index = args.check_index if args.check_index <= N else N-10
     csv_file = open(CSVPATH, "r", newline="")
     csv_list = list(csv.reader(csv_file, delimiter=","))[1:]
