@@ -1,9 +1,0 @@
-version: "3"
-
-services: 
-  ml-container:
-    image: python:3.8.9-alpine3.13
-    container_name: mlctn
-    volumes:
-      - ../:/root
-    tty: true

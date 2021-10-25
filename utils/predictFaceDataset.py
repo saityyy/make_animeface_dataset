@@ -1,16 +1,10 @@
 import pandas as pd
 import torch
-from torch.utils import data
 from torch.utils.data import Dataset
 from torchvision import transforms
-from torchvision.transforms import ToTensor, Resize
-from torchvision.io import read_image
 from PIL import Image, ImageDraw
-import numpy as np
 import matplotlib.pyplot as plt
 import os
-import cv2
-from torchvision.transforms.transforms import ToPILImage
 from tqdm import tqdm
 
 

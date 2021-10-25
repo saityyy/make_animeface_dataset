@@ -1,3 +1,4 @@
 *.pickle
 *.pt
 manage_data/data/*
+torchenv

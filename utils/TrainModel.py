@@ -1,5 +1,6 @@
 import random
 import torch
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 from utils.IoULoss import IoULoss
@@ -34,7 +35,7 @@ class TrainModel:
     def train_loop(self):
         size = len(self.train_dataloader.dataset)
         loss_sum = 0
-        for batch, (X, y) in enumerate(self.train_dataloader):
+        for batch, (X, y) in enumerate(tqdm(self.train_dataloader)):
             X = X.to(self.device).to(torch.float32).requires_grad_(True)
             y = y.to(self.device).to(torch.float32).requires_grad_(True)
             pred = self.model(X)
