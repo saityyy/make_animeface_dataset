@@ -2,77 +2,59 @@ import pandas as pd
 from torch.utils import data
 from torch.utils.data import Dataset
 from torchvision import transforms
-from torchvision.transforms import ToTensor
+from torchvision.transforms import ToTensor, Resize
+from torchvision.io import read_image
+from PIL import Image, ImageDraw
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 import cv2
+from torchvision.transforms.transforms import ToPILImage
 from tqdm import tqdm
-
-IMAGE_SIZE = 200
-train_data_ratio = 0.9
-
-transform = transforms.Compose([
-
-    ToTensor()
-])
 
 
 class ImageDataset(Dataset):
-    def __init__(self, csv_file_path, img_dir, train_flag, transform=ToTensor()):
-        self.csv_data = np.loadtxt(csv_file_path, delimiter=',')
-        self.csv_data = np.delete(self.csv_data, 0, 1)
-        self.face_data = pd.read_csv(csv_file_path)
-        self.img_path = img_dir
-        self.transform = transform
+    def __init__(self, dataset_path, image_size):
+        csv_file_path = os.path.join(dataset_path, "face_data.csv")
+        self.img_dir = os.path.join(dataset_path, "image")
+        self.face_data = pd.read_csv(csv_file_path).iloc[:, 1:]
+        self.image_size = image_size
+        self.transform = transforms.Compose([
+            transforms.Resize(image_size),
+            transforms.ToTensor()
+        ])
+        self.target_transform()
 
-    def clip_images(self, img, label):
-        h, w, _ = tuple(img.shape)
-        if h > w:
-            add_tensor = np.zeros((h, h-w, 3))
-            img = np.concatenate([img, add_tensor], axis=1)
-        elif w > h:
-            add_tensor = np.zeros((w-h, w, 3))
-            img = np.concatenate([img, add_tensor], axis=0)
-        img = cv2.resize(img, (IMAGE_SIZE, IMAGE_SIZE))
-        new_label = list(map(lambda x: int(x*IMAGE_SIZE/max(h, w)), label))
-        return (img, new_label)
+    def target_transform(self):
+        for i in range(len(os.listdir(self.img_dir))):
+            img_path = os.path.join(
+                self.img_dir, f"img{i+1}.png")
+            img = read_image(img_path)
+            self.face_data.iloc[i, :] /= max(img.shape)
 
     def __len__(self):
-        return len(self.img_labels)
+        return len(self.face_data)
 
     def __getitem__(self, idx):
-        image = self.img[idx]
-        label = self.img_labels[idx]
+        img_path = os.path.join(
+            self.img_dir, f"img{idx+1}.png")
+        image = Image.open(img_path)
+        label = self.face_data.iloc[idx, :]
         if self.transform:
             image = self.transform(image)
         return image, label
 
-    def imshow(self, idx, pred=None):
-        image = cv2.cvtColor(self.img[idx], cv2.COLOR_BGR2RGB)
-        image = image.astype("int32")
-        x, y, size = tuple((self.img_labels[idx]*IMAGE_SIZE).astype("int32"))
-        if pred is not None:
-            print(pred)
-            pred = tuple((pred*IMAGE_SIZE).astype("int32"))
-            x, y, size = pred
+    def image_show(self, idx):
+        _, label = self.__getitem__(idx)
+        print(label)
+        img_path = os.path.join(
+            self.img_dir, f"img{idx+1}.png")
+        image = Image.open(img_path)
+        image = image.resize((self.image_size, self.image_size))
+        draw = ImageDraw.Draw(image)
+        x, y, size = tuple(map(lambda x: x*image.width, label))
         print(x, y, size)
-        for i in range(2*size):
-            try:
-                image[y-size, x-size+i] = 0
-            except:
-                pass
-            try:
-                image[y+size, x-size+i] = 0
-            except:
-                pass
-            try:
-                image[y-size+i, x-size] = 0
-            except:
-                pass
-            try:
-                image[y-size+i, x+size] = 0
-            except:
-                pass
+        draw.rectangle((x-size, y-size, x+size, y+size),
+                       outline="#000", width=3)
         plt.imshow(image)
         plt.show()

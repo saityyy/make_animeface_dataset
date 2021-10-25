@@ -13,7 +13,7 @@ CSV_PATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
 DATASET_PATH = os.path.join(os.path.dirname(__file__), "data/predictFaceDB")
 IMAGE_SIZE = 200
 split_ratio = 0.9
-allow_aspect_ratio = 1.4
+allow_aspect_ratio = 1.0
 
 
 def transform_image(img_path):
@@ -61,6 +61,7 @@ def make_predictFaceDB(face_data):
         csv_list.append([renban]+face_data[i][1:4])
     with open(train_face_data_path, 'w', newline='') as f:
         writer = csv.writer(f)
+        writer.writerow(["index", "x", "y", "size"])
         writer.writerows(csv_list)
 
     val_img_dir = os.path.join(DATASET_PATH, "val", "image")
@@ -76,12 +77,13 @@ def make_predictFaceDB(face_data):
         csv_list.append([renban]+face_data[i][1:4])
     with open(val_face_data_path, 'w', newline='') as f:
         writer = csv.writer(f)
+        writer.writerow(["index", "x", "y", "size"])
         writer.writerows(csv_list)
 
 
 def main():
     csv_file = open(CSV_PATH, 'r', newline="")
-    face_data = list(csv.reader(csv_file, delimiter=","))
+    face_data = list(csv.reader(csv_file, delimiter=","))[1:]
     shutil.rmtree(DATASET_PATH)
     if not os.path.isdir(DATASET_PATH):
         os.mkdir(DATASET_PATH)

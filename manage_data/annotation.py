@@ -8,15 +8,26 @@ import csv
 import tkinter as tk
 from PIL import Image, ImageTk
 
-TEMP_PATH = os.path.join(os.path.dirname(__file__), "data/temp")
-IMAGE_PATH = os.path.join(os.path.dirname(__file__), "data/image")
-CSV_PATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
+from manage_data.check import IMAGEPATH
+
+DATA_PATH = os.path.join(os.path.dirname(__file__), "data")
+TEMP_PATH = os.path.join(DATA_PATH, "temp")
+IMAGE_PATH = os.path.join(DATA_PATH, "image")
+CSV_PATH = os.path.join(DATA_PATH, "target.csv")
 
 
 class Annotation:
     def __init__(self):
+        if not os.path.isdir(DATA_PATH):
+            os.mkdir(DATA_PATH)
+            os.mkdir(TEMP_PATH)
+            os.mkdir(IMAGEPATH)
+            with open(CSV_PATH, 'w', newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(["index", "x", "y", "size"])
         self.show_id = None
-        self.start_index = sum(1 for _ in open(CSV_PATH))
+        self.start_index = sum(1 for _ in open(CSV_PATH))-1
+        print(self.start_index)
         self.img_index = self.start_index+1
         self.centerx, self.centery, self.size = 0, 0, 0
         self.first_temp_num = len(os.listdir(TEMP_PATH))

@@ -87,6 +87,7 @@ def delete(number, csv_list):
               remove_img_path)
     with open(CSVPATH, 'w', newline='')as f:
         writer = csv.writer(f)
+        writer.writerow(["index", "x", "y", "size"])
         writer.writerows(csv_list)
     print("remove {}".format(number))
     exit()
@@ -109,7 +110,7 @@ if __name__ == "__main__":
         N = len(os.listdir(IMAGEPATH))
         args.check_index = args.check_index if args.check_index <= N else N-10
     csv_file = open(CSVPATH, "r", newline="")
-    csv_list = list(csv.reader(csv_file, delimiter=","))
+    csv_list = list(csv.reader(csv_file, delimiter=","))[1:]
     if args.delete != -1:
         delete(args.delete, csv_list)
     check = Check(args.check_index, csv_list)

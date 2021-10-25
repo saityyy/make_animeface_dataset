@@ -3,35 +3,30 @@ import matplotlib.pyplot as plt
 import torch
 import os
 import pickle
-
+from torchvision import transforms
 from utils.ImageDataset import ImageDataset
 from utils.Model import Model
 from utils.TrainModel import TrainModel
 
 
+IMAGE_SIZE = 200
+DATASET_PATH = os.path.join(os.path.dirname(
+    __file__), "manage_data/data/predictFaceDB")
 CSV_PATH = "../data/target.csv"
 IMAGE_PATH = "../data/image"
 load_path = "./weight/resnet18.pth"
 load_path = "./weight/{}".format(os.listdir("./weight")[1])
 print(load_path)
 
-make_dataset_flag = True
-# pickleデータでデータセット読み込み
-if make_dataset_flag:
-    train_dataset = ImageDataset(CSV_PATH, IMAGE_PATH, True)
-    test_dataset = ImageDataset(CSV_PATH, IMAGE_PATH, False)
-    with open('./train_dataset.pickle', 'wb')as f:
-        pickle.dump(train_dataset, f)
-    with open('./test_dataset.pickle', 'wb')as f:
-        pickle.dump(test_dataset, f)
-else:
-    with open('./train_dataset.pickle', 'rb')as f:
-        train_dataset = pickle.load(f)
-    with open('./test_dataset.pickle', 'rb')as f:
-        test_dataset = pickle.load(f)
-    print(train_dataset.img.shape)
-    print(test_dataset.img.shape)
-# データセットを１から作成
+train_dataset = ImageDataset(os.path.join(
+    DATASET_PATH, "train"), IMAGE_SIZE)
+test_dataset = ImageDataset(os.path.join(
+    DATASET_PATH, "val"), IMAGE_SIZE)
+img, t = train_dataset[0]
+print(img.shape)
+for i in range(10):
+    train_dataset.image_show(i)
+exit()
 
 batch_size = 128
 lr = 1e-4
