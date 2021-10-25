@@ -14,7 +14,7 @@ from torchvision.transforms.transforms import ToPILImage
 from tqdm import tqdm
 
 
-class ImageDataset(Dataset):
+class predictFaceDataset(Dataset):
     def __init__(self, dataset_path, image_size):
         csv_file_path = os.path.join(dataset_path, "face_data.csv")
         self.img_dir = os.path.join(dataset_path, "image")

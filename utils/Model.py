@@ -1,13 +1,12 @@
 from torch import nn
-import torchvision.models as models
 
 
 class Model(nn.Module):
-    def __init__(self):
+    def __init__(self, m):
         super(Model, self).__init__()
         self.loss = []
         self.acc = []
-        self.resnet18 = models.resnet18(pretrained=False)
+        self.resnet = m
         self.fc = nn.Sequential(
             nn.Flatten(),
             nn.Linear(1000, 256),
@@ -20,7 +19,7 @@ class Model(nn.Module):
         )
 
     def forward(self, x):
-        x = self.resnet18(x)
+        x = self.resnet(x)
         x = self.fc(x)
         for i in range(len(x)):
             outx = x[i][0].clone()

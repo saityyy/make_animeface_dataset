@@ -12,7 +12,7 @@ IMAGE_PATH = os.path.join(os.path.dirname(__file__), "data/image")
 CSV_PATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
 DATASET_PATH = os.path.join(os.path.dirname(__file__), "data/predictFaceDB")
 split_ratio = 0.9
-allow_aspect_ratio = 1.4
+allow_aspect_ratio = 1.6
 
 
 def transform_image(img_path):
@@ -51,7 +51,7 @@ def make_predictFaceDB(face_data):
     N = len(data_index_list)
     thd = int(N*split_ratio)
     csv_list = []
-    for renban, i in enumerate(data_index_list[:thd], start=1):
+    for renban, i in tqdm(enumerate(data_index_list[:thd], start=1)):
         img_name = f"img{i+1}.png"
         src = os.path.join(IMAGE_PATH, img_name)
         dst = os.path.join(train_img_dir, f"img{renban}.png")
@@ -67,7 +67,7 @@ def make_predictFaceDB(face_data):
     val_face_data_path = os.path.join(DATASET_PATH, "val", "face_data.csv")
     os.mkdir(val_img_dir)
     csv_list = []
-    for renban, i in enumerate(data_index_list[thd:], start=1):
+    for renban, i in tqdm(enumerate(data_index_list[thd:], start=1)):
         img_name = f"img{i+1}.png"
         src = os.path.join(IMAGE_PATH, img_name)
         img = transform_image(src)
@@ -83,7 +83,7 @@ def make_predictFaceDB(face_data):
 def main():
     csv_file = open(CSV_PATH, 'r', newline="")
     face_data = list(csv.reader(csv_file, delimiter=","))[1:]
-    shutil.rmtree(DATASET_PATH)
+    # shutil.rmtree(DATASET_PATH)
     if not os.path.isdir(DATASET_PATH):
         os.mkdir(DATASET_PATH)
         os.mkdir(os.path.join(DATASET_PATH, "train"))
