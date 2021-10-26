@@ -48,12 +48,8 @@ class Model(nn.Module):
 epoch = 50
 batch_size = 64
 device = torch.device("cuda"if torch.cuda.is_available() else "cpu")
-#train_dataset = ImageFolder(TRAIN_DATASET_PATH, transform)
-#test_dataset = ImageFolder(VAL_DATASET_PATH, transform)
-with open("./pretrain-train.pickle", 'rb') as f:
-    train_dataset = pickle.load(f)
-with open("./pretrain-test.pickle", 'rb') as f:
-    test_dataset = pickle.load(f)
+train_dataset = ImageFolder(TRAIN_DATASET_PATH, transform)
+test_dataset = ImageFolder(VAL_DATASET_PATH, transform)
 train_dataloader = DataLoader(
     train_dataset, batch_size=batch_size, shuffle=True)
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
