@@ -8,12 +8,12 @@ import random
 import string
 import tkinter as tk
 from PIL import Image, ImageTk
-from make_animefaceDB import aspect_ratio_check
+from make_predictFaceDB import aspect_ratio_check
 
 # 指定のフォルダから画像をランダムに参照する
 FROMPATH = "D:/Project/MLProject/DataScience/data/GirlsImage"
 TOPATH = os.path.join(os.path.dirname(__file__), "data/temp")
-allow_aspect_ratio = 1.4
+allow_aspect_ratio = 1.3
 
 
 class CheckFace:

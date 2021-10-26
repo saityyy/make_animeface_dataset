@@ -1,4 +1,4 @@
-epochs=300
+epochs=100
 batch_size=256
 
 python train.py --model=resnet50  batch_size=${batch_size} epochs=${epochs}
