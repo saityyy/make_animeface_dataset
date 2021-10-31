@@ -16,6 +16,8 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
 # %%
+DB_NAME = "illustFaceDB"
+DB_PATH = "C:\\Users\sec20\OneDrive\DB\{}".format("illustratorDB")
 DB_PATH = os.path.join(os.path.dirname(__file__),
                        "manage_data", "data", "illustFaceDB")
 TRAIN_DATASET_PATH = os.path.join(DB_PATH, "train")
@@ -45,8 +47,9 @@ class Model(nn.Module):
         return x
 
 
-epoch = 50
-batch_size = 64
+epoch = 10
+batch_size = 256
+model_name = "resnet18"
 device = torch.device("cuda"if torch.cuda.is_available() else "cpu")
 train_dataset = ImageFolder(TRAIN_DATASET_PATH, transform)
 test_dataset = ImageFolder(VAL_DATASET_PATH, transform)
@@ -55,7 +58,12 @@ train_dataloader = DataLoader(
 test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 print(len(train_dataset))
 print(len(test_dataset))
-model = Model(models.resnet50(pretrained=False)).to(device)
+if model_name == "resnet50":
+    model = Model(models.resnet50(pretrained=False)).to(device)
+elif model_name == "resnet18":
+    model = Model(models.resnet18(pretrained=False)).to(device)
+#wht = torch.load(os.path.join(WEIGHT_PATH, "resnet18.pth"))
+# model.pretrained_model.load_state_dict(wht)
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 criterion = nn.CrossEntropyLoss().to(device)
 acc_list = [0]
@@ -74,10 +82,12 @@ for _ in range(epoch):
         y = model(x)
         correct_sum += (torch.argmax(y, dim=1) == t).sum()
         loss = criterion(y, t)
+    print(correct_sum)
+    print(len(test_dataset))
     acc = (correct_sum.cpu().detach().numpy())/len(test_dataset)
     if acc > max(acc_list):
         torch.save(model.pretrained_model.cpu().state_dict(),
-                   os.path.join(WEIGHT_PATH, "./resnet50.pth"))
+                   os.path.join(WEIGHT_PATH, "{}-{}-{:.3g}.pth".format(DB_NAME, model_name, acc)))
         model.pretrained_model.cuda()
     acc_list.append(acc)
     print(acc)

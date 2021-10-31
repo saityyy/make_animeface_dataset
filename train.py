@@ -15,14 +15,15 @@ DATA_PATH = os.path.join(os.path.dirname(__file__), "manage_data/data")
 DATASET_PATH = os.path.join(DATA_PATH, "predictFaceDB")
 parser = argparse.ArgumentParser()
 parser.add_argument('--batch_size', type=int, default=64)
-parser.add_argument('--lr', type=float, default=1e-4)
+parser.add_argument('--lr', type=float, default=1e-3)
 parser.add_argument('--epochs', type=int, default=1)
 parser.add_argument('--image_size', type=int, default=100)
-parser.add_argument('--model', default='resnet18', help="resnet18,resnet50")
+parser.add_argument('--weight_name', default='resnet18.pth',
+                    help="weight file name")
 parser.add_argument('--pretrain_flag', action="store_true")
 
 WEIGHT_DIR = os.path.join(os.path.dirname(__file__), "weight")
-pickle_flag = True
+pickle_flag = False
 
 
 def load_dataset(pickle_flag):
@@ -55,21 +56,27 @@ if __name__ == "__main__":
     print(f"test num : {len(test_dataset)}")
     print(f"image_size : {IMAGE_SIZE}")
     print(f"batch_size : {batch_size}")
-    print(f"model : {args.model}")
+    print(f"model : {args.weight_name}")
     if not args.pretrain_flag:
         print("pretrain : False")
-        if args.model == "resnet18":
+        if args.weight_name == "resnet18":
             model = Model(models.resnet18(pretrained=False))
-        elif args.model == "resnet50":
+        elif args.weight_name == "resnet50":
             model = Model(models.resnet50(pretrained=False))
     else:
         print("pretrain : True")
-        if args.model == "resnet18":
-            model = Model(models.resnet18(pretrained=True))
-            weight = torch.load(os.path.join(WEIGHT_DIR, "resnet18.pth"))
-        elif args.model == "resnet50":
-            model = Model(models.resnet50(pretrained=True))
-            weight = torch.load(os.path.join(WEIGHT_DIR, "resnet50.pth"))
+        try:
+            if "resnet18" in args.weight_name:
+                model = Model(models.resnet18(pretrained=False))
+                weight = torch.load(os.path.join(
+                    WEIGHT_DIR, args.weight_name))
+            elif "resnet50" in args.weight_name:
+                model = Model(models.resnet50(pretrained=False))
+                weight = torch.load(os.path.join(
+                    WEIGHT_DIR, args.weight_name))
+        except:
+            print("Not Found weight file")
+            exit()
         model.resnet.load_state_dict(weight)
 
     trainer = TrainModel(model, train_dataset, test_dataset)
@@ -82,7 +89,7 @@ if __name__ == "__main__":
     test_loss = trainer.test_loss
     trainer.predict_face(10)
     torch.save(trainer.model.state_dict(),
-               os.path.join(WEIGHT_DIR, f"{args.model}-{test_loss[-1]}.pt"))
+               os.path.join(WEIGHT_DIR, f"{args.model}-{test_loss[-1]}.pth"))
     plt.plot(test_loss)
     plt.savefig(os.path.join(
         DATA_PATH, f"{args.model}-{args.pretrain_flag}-{IMAGE_SIZE}"))
