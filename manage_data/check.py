@@ -22,8 +22,6 @@ parser.add_argument('-i', '--check_index', type=int,
                     default=f"{len(os.listdir(IMAGE_PATH))-10}", help="select index to start showing.default -> [-10:]")
 parser.add_argument('-d', '--delete', type=int, default=-1,
                     help="select index of image to be deleted")
-parser.add_argument('-c', '--change_path', default="data",
-                    help="you can check or delete predictFaceDB. select 'train' or 'val'")
 
 
 class Check:

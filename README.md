@@ -1,29 +1,22 @@
 # make_animeface_dataset
+イラストの顔画像データセット作成ツールです。手動、またはトレーニングされた顔検出モデルを用いた自動検出( WIP )によってデータセットを作成できます。
 
-![diagram](https://user-images.githubusercontent.com/62131533/125000595-af3cb780-e08b-11eb-889a-971528b67dac.png)
+# データセット作成（手動）
+- config.ymlに大量の画像があるディレクトリ(source)とデータセットを作成するディレクトリ(dataset)を設定してください。
 
-# 使い方
-1. annotationフォルダを作成し、その直下でgit cloneする。  
-`mkdir annotation`  
-`cd annotation`  
-`git clone https://github.com/saityyy/make_animeface_dataset.git`  
-2. 指定のディレクトリ構成になるようにフォルダやファイルを作成する。(temp,image,target.csv)  
-3. 取ってきたい画像が入ったフォルダのパスを設定する(check_face.pyのFROMPATH変数)。  
-  
-  
-# 各スクリプトの説明  
-- **check_face.py**  
-データセットとして使えるかどうかの判定を行う。使えるものはtempフォルダにコピーされる。  
+- アノテーションデータの保存に用いられるtarget.csvの形式は以下のとおりです。  
+  [画像番号 , 矩形の中心X座標 , 矩形の中心y座標 , 矩形のサイズ]
 
-- **fetch_image.py**  
-tempフォルダにある画像を適切なファイル名に変更した後、imageフォルダに移す。  
+- 以下のコマンドを実行することでアノテーションを手動で行う事ができます。   
+`python ./manage_data/annotation.py`  
+中心点を一回目のクリックで決め、二回目のクリックで矩形のサイズを確定させます。  
+画像は設定されたディレクトリ(source)からランダムで取ってきます。
 
-- **annotation.py**  
-顔の部分を手動で矩形選択する。矩形のデータはtarget.csvに保存される。  
+- 以下のコマンドを実行することで正常にアノテーションできているかの確認ができます。   
+`python ./manage_data/check.py`  
+`-i n`オプションでn番目の画像をチェックすることが出来ます。デフォルトは後ろから１０番目の画像が指定されています。  
+`-d n`オプションでn番目の画像を削除することが出来ます。
 
-- **check.py {number}**  
-csvファイルの矩形が実際に顔を捉えているか確認する。{number}は画像番号を指定する。  
-  
-# csvの形式  
-  [画像番号,矩形の中心X座標,矩形の中心y座標,矩形のサイズ]
+# データセット作成(自動)
+作成中...
   
