@@ -12,7 +12,7 @@ from PIL import Image, ImageTk
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 with open(os.path.join(BASE_DIR, "config.yml"), 'r') as yml:
     config = yaml.load(yml, Loader=yaml.SafeLoader)
-    DATA_PATH = os.path.join(BASE_DIR, config['dataset'])
+    DATA_PATH = os.path.join(BASE_DIR, config['annotation_dataset'])
 IMAGE_PATH = os.path.join(DATA_PATH, "image")
 CSV_PATH = os.path.join(DATA_PATH, "target.csv")
 PAGE_SCALE = 500

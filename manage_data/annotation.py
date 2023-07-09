@@ -14,7 +14,7 @@ from make_predictFaceDB import aspect_ratio_check
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 with open(os.path.join(BASE_DIR, "config.yml"), 'r') as yml:
     config = yaml.load(yml, Loader=yaml.SafeLoader)
-    SOURCE_PATH = config['dataset']
+    SOURCE_PATH = config['annotation_dataset']
     DATA_PATH = os.path.join(BASE_DIR, config['source'])
 IMAGE_PATH = os.path.join(SOURCE_PATH, "image")
 CSV_PATH = os.path.join(SOURCE_PATH, "target.csv")

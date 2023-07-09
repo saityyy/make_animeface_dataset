@@ -1,2 +1,3 @@
 source: "E:/Project/MLProject/DataScience/data/GirlsImageDataset/imgData"
-dataset: "./data"
+annotation_dataset: "./data/annotation"
+face_dataset: "./data/illustFaceDB"

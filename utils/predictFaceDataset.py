@@ -41,12 +41,12 @@ class predictFaceDataset(Dataset):
     def __getitem__(self, idx):
         # img_path = os.path.join(
         # self.img_dir, f"img{idx+1}.png")
-        #image = Image.open(img_path)
+        # image = Image.open(img_path)
         # O(1)で画像データを取得
         image = self.image[idx]
         label = torch.tensor(self.face_data.iloc[idx, :].values)
         # if self.transform:
-        #image = self.transform(image)
+        # image = self.transform(image)
         return image, label
 
     def image_show(self, idx, predict=None):
@@ -59,9 +59,9 @@ class predictFaceDataset(Dataset):
         image = Image.open(img_path)
         image = image.resize((self.image_size, self.image_size))
         draw = ImageDraw.Draw(image)
-        x, y, size = tuple(map(lambda x: x*image.width, list(label)))
+        x, y, size = tuple(map(lambda x: x * image.width, list(label)))
         print(x, y, size)
-        draw.rectangle((x-size, y-size, x+size, y+size),
+        draw.rectangle((x - size, y - size, x + size, y + size),
                        outline="#000", width=3)
         plt.imshow(image)
         plt.show()
