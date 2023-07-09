@@ -57,7 +57,7 @@ with open(os.path.join(BASE_DIR, "config.yml"), 'r') as yml:
     DATA_PATH = os.path.join(BASE_DIR, config['annotation_dataset'])
     DATASET_PATH = os.path.join(BASE_DIR, config['face_dataset'])
 IMAGE_PATH = os.path.join(DATA_PATH, "image")
-CSV_PATH = os.path.join(DATA_PATH, "target.csv")
+CSV_PATH = os.path.join(DATA_PATH, "face_data.csv")
 IMAGE_SIZE = 100
 split_ratio = 0.9
 train_num, val_num = 3000, 300

@@ -14,7 +14,7 @@ with open(os.path.join(BASE_DIR, "config.yml"), 'r') as yml:
     config = yaml.load(yml, Loader=yaml.SafeLoader)
     DATA_PATH = os.path.join(BASE_DIR, config['annotation_dataset'])
 IMAGE_PATH = os.path.join(DATA_PATH, "image")
-CSV_PATH = os.path.join(DATA_PATH, "target.csv")
+CSV_PATH = os.path.join(DATA_PATH, "face_data.csv")
 PAGE_SCALE = 500
 
 parser = argparse.ArgumentParser()
@@ -22,6 +22,10 @@ parser.add_argument('-i', '--check_index', type=int,
                     default=f"{len(os.listdir(IMAGE_PATH))-10}", help="select index to start showing.default -> [-10:]")
 parser.add_argument('-d', '--delete', type=int, default=-1,
                     help="select index of image to be deleted")
+parser.add_argument('-ct', action='store_true',
+                    help="check detectFaceDB train data")
+parser.add_argument('-cv', action='store_true',
+                    help="check detectFaceDB val data")
 
 
 class Check:
@@ -106,6 +110,23 @@ def get_data_path(sub_dir):
 
 def check():
     args = parser.parse_args()
+    if args.ct or args.cv:
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        global DATA_PATH, IMAGE_PATH, CSV_PATH
+        with open(os.path.join(BASE_DIR, "config.yml"), 'r') as yml:
+            config = yaml.load(yml, Loader=yaml.SafeLoader)
+            if args.ct:
+                DATA_PATH = os.path.join(
+                    BASE_DIR, config['detect_face_dataset'], "train")
+                print("check detectFaceDB train data")
+            else:
+                DATA_PATH = os.path.join(
+                    BASE_DIR, config['detect_face_dataset'], "val")
+                print("check detectFaceDB val data")
+        IMAGE_PATH = os.path.join(DATA_PATH, "image")
+        CSV_PATH = os.path.join(DATA_PATH, "face_data.csv")
+    else:
+        print("check annotation dataset")
     csv_file = open(CSV_PATH, "r", newline="")
     csv_list = list(csv.reader(csv_file, delimiter=","))[1:]
     if args.delete != -1:

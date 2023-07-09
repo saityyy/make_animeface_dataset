@@ -17,7 +17,7 @@ with open(os.path.join(BASE_DIR, "config.yml"), 'r') as yml:
     SOURCE_PATH = config['annotation_dataset']
     DATA_PATH = os.path.join(BASE_DIR, config['source'])
 IMAGE_PATH = os.path.join(SOURCE_PATH, "image")
-CSV_PATH = os.path.join(SOURCE_PATH, "target.csv")
+CSV_PATH = os.path.join(SOURCE_PATH, "face_data.csv")
 ALLOW_ASPECT_RATIO = 1.5
 
 

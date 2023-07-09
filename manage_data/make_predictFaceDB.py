@@ -1,17 +1,20 @@
 import csv
 import os
-import shutil
 import cv2
+import yaml
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
-import matplotlib.pyplot as plt
 
 
-IMAGE_PATH = os.path.join(os.path.dirname(__file__), "data/image")
-CSV_PATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
-DATASET_PATH = os.path.join(os.path.dirname(__file__), "data/predictFaceDB")
-split_ratio = 0.9
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+with open(os.path.join(BASE_DIR, "config.yml"), 'r') as yml:
+    config = yaml.load(yml, Loader=yaml.SafeLoader)
+    DATA_PATH = os.path.join(BASE_DIR, config['annotation_dataset'])
+    DATASET_PATH = os.path.join(BASE_DIR, config['detect_face_dataset'])
+IMAGE_PATH = os.path.join(DATA_PATH, "image")
+CSV_PATH = os.path.join(DATA_PATH, "face_data.csv")
+SPLIT_RATIO = 0.9
 ALLOW_ASPECT_RATIO = 1.6
 
 
@@ -50,7 +53,7 @@ def make_predictFaceDB(face_data):
     train_face_data_path = os.path.join(DATASET_PATH, "train", "face_data.csv")
     os.mkdir(train_img_dir)
     N = len(data_index_list)
-    thd = int(N * split_ratio)
+    thd = int(N * SPLIT_RATIO)
     csv_list = []
     for renban, i in enumerate(tqdm(data_index_list[:thd]), start=1):
         img_name = f"img{i+1}.png"
@@ -91,8 +94,8 @@ def main():
         make_predictFaceDB(face_data)
 
     else:
-        print("predictFaceDB exist!")
-        shutil.rmtree(DATASET_PATH)
+        print("detectFaceDB exist!")
+        # shutil.rmtree(DATASET_PATH)
         main()
 
 
