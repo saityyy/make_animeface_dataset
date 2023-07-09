@@ -5,11 +5,16 @@
 import os
 import csv
 import argparse
+import yaml
 import tkinter as tk
 from PIL import Image, ImageTk
 
-IMAGE_PATH = os.path.join(os.path.dirname(__file__), "data/image")
-CSVPATH = os.path.join(os.path.dirname(__file__), "data/target.csv")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+with open(os.path.join(BASE_DIR, "config.yml"), 'r') as yml:
+    config = yaml.load(yml, Loader=yaml.SafeLoader)
+    DATA_PATH = os.path.join(BASE_DIR, config['dataset'])
+IMAGE_PATH = os.path.join(DATA_PATH, "image")
+CSV_PATH = os.path.join(DATA_PATH, "target.csv")
 PAGE_SCALE = 500
 
 parser = argparse.ArgumentParser()
@@ -36,7 +41,7 @@ class Check:
         print(f'image index : {self.image_index}')
         self.canvas.create_image(0, 0, image=self.img, anchor=tk.NW)
         self.root.geometry("{}x{}".format(PAGE_SCALE, PAGE_SCALE))
-        self.draw_rectangle(self.csv_list[self.image_index-1])
+        self.draw_rectangle(self.csv_list[self.image_index - 1])
         self.canvas.bind('<Button-1>', self.click)  # 左クリック
         self.canvas.bind('<Button-3>', self.click)  # 右クリック
         self.root.mainloop()
@@ -50,9 +55,9 @@ class Check:
             self.img_path = os.path.join(
                 IMAGE_PATH, f"img{self.image_index}.png")
             img = Image.open(self.img_path)
-        self.scale = max(img.width, img.height)/PAGE_SCALE
-        self.img_width = int(img.width/self.scale)
-        self.img_height = int(img.height/self.scale)
+        self.scale = max(img.width, img.height) / PAGE_SCALE
+        self.img_width = int(img.width / self.scale)
+        self.img_height = int(img.height / self.scale)
         img = ImageTk.PhotoImage(
             img.resize((self.img_width, self.img_height)))
         return img
@@ -61,31 +66,33 @@ class Check:
         self.img = self.select_image()
         print(f'image index : {self.image_index}')
         self.canvas.create_image(0, 0, image=self.img, anchor=tk.NW)
-        self.draw_rectangle(self.csv_list[self.image_index-1])
+        self.draw_rectangle(self.csv_list[self.image_index - 1])
 
     def draw_rectangle(self, data):
         self.image_index += 1
         data = list(map(int, data))
-        cx = int(data[1]/self.scale)
-        cy = int(data[2]/self.scale)
-        size = int(data[3]/self.scale)
+        cx = int(data[1] / self.scale)
+        cy = int(data[2] / self.scale)
+        size = int(data[3] / self.scale)
         if self.show_id is not None:
             self.canvas.delete(self.show_id)
         self.show_id = self.canvas.create_rectangle(
-            cx-size, cy-size, cx+size, cy+size)
+            cx - size, cy - size, cx + size, cy + size)
 
 
 def delete(number, csv_list):
     end_data = csv_list[-1]
-    csv_list[number-1] = end_data
-    csv_list[number-1][0] = number
+    csv_list[number - 1] = end_data
+    csv_list[number - 1][0] = number
     csv_list.pop()
     total_img = len(os.listdir(IMAGE_PATH))
     remove_img_path = os.path.join(IMAGE_PATH, "img{}.png".format(number))
     os.remove(remove_img_path)
-    os.rename(os.path.join(IMAGE_PATH, "img{}.png".format(total_img)),
-              remove_img_path)
-    with open(CSVPATH, 'w', newline='')as f:
+    print(number, total_img)
+    if not number == total_img:
+        os.rename(os.path.join(IMAGE_PATH, "img{}.png".format(total_img)),
+                  remove_img_path)
+    with open(CSV_PATH, 'w', newline='')as f:
         writer = csv.writer(f)
         writer.writerow(["index", "x", "y", "size"])
         writer.writerows(csv_list)
@@ -99,19 +106,15 @@ def get_data_path(sub_dir):
     return image_path, csv_path
 
 
-if __name__ == "__main__":
+def check():
     args = parser.parse_args()
-    if args.change_path == "train" or args.change_path == "val":
-        sub_dir = {
-            'image': f'data/predictFaceDB/{args.change_path}/image',
-            'csv': f'data/predictFaceDB/{args.change_path}/face_data.csv'
-        }
-        IMAGE_PATH, CSVPATH = get_data_path(sub_dir)
-        N = len(os.listdir(IMAGE_PATH))
-        args.check_index = args.check_index if args.check_index <= N else N-10
-    csv_file = open(CSVPATH, "r", newline="")
+    csv_file = open(CSV_PATH, "r", newline="")
     csv_list = list(csv.reader(csv_file, delimiter=","))[1:]
     if args.delete != -1:
         delete(args.delete, csv_list)
-    check = Check(args.check_index, csv_list)
+    c = Check(args.check_index, csv_list)
+    c()
+
+
+if __name__ == "__main__":
     check()

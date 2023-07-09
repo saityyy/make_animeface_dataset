@@ -1,4 +1,8 @@
 *.pickle
-manage_data/data/*
+data
 *.pth
 torchenv
+.vscode
+.venv
+
+__pycache__
