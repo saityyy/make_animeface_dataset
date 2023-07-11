@@ -37,7 +37,7 @@ class TrainModel:
             X = X.to(self.device).to(torch.float32).requires_grad_(True)
             y = y.to(self.device).to(torch.float32).requires_grad_(True)
             pred = self.model(X)
-            loss = self.loss_fn(pred, y, reduction='mean')
+            loss = self.loss_fn(pred, y, reduction='sum')
             l_norm = torch.tensor(0., requires_grad=True)
             for w in self.model.parameters():
                 l_norm = l_norm + torch.linalg.norm(w.flatten(), p)
@@ -47,6 +47,7 @@ class TrainModel:
             loss.backward()
             self.optimizer.step()
         self.train_loss.append(loss_sum)
+        print(loss_sum)
 
     def test_loop(self):
         loss_sum = 0

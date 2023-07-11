@@ -19,7 +19,7 @@ parser.add_argument('--batch_size', type=int, default=32)
 parser.add_argument('--lr', type=float, default=1e-4)
 parser.add_argument('--epochs', type=int, default=100)
 parser.add_argument('--image_size', type=int, default=300)
-parser.add_argument('--weight_name', default='resnet50',
+parser.add_argument('--weight_name', default='resnet18',
                     help="weight file name")
 parser.add_argument('--pretrain_flag', action="store_true")
 
@@ -76,4 +76,4 @@ if __name__ == "__main__":
     test_loss = trainer.test_loss
     pprint(test_loss)
     torch.save(trainer.model.state_dict(),
-               os.path.join(WEIGHT_DIR, f"{args.weight_name}_{batch_size}_{IMAGE_SIZE}_{lr}.pth"))
+               os.path.join(WEIGHT_DIR, f"{args.weight_name}_{batch_size}_{IMAGE_SIZE}_{lr}_{test_loss[-1]}.pth"))
